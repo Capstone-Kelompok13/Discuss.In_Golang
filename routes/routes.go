@@ -4,20 +4,19 @@ import (
 	"database/sql"
 	"discusiin/configs"
 	"discusiin/repositories"
-	tService "discusiin/services/topics"
 	uService "discusiin/services/users"
 
 	"gorm.io/gorm"
 )
 
 type Payload struct {
-	Config   *configs.Config
-	DBGorm   *gorm.DB
-	DBSql    *sql.DB
-	repoSql  repositories.IDatabase
-	repoTSql repositories.ITopicDatabase
+	Config  *configs.Config
+	DBGorm  *gorm.DB
+	DBSql   *sql.DB
+	repoSql repositories.IDatabase
+	// repoTSql repositories.ITopicDatabase
 	uService uService.IUserServices
-	tService tService.ITopicServices
+	// tService tService.ITopicServices
 }
 
 func (p *Payload) InitUserService() {

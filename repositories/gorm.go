@@ -10,6 +10,11 @@ type GormSql struct {
 	DB *gorm.DB
 }
 
+// // SaveTopic implements IDatabase
+// func (*GormSql) SaveTopic(models.Topic) error {
+// 	panic("unimplemented")
+// }
+
 func NewGorm(db *gorm.DB) IDatabase {
 	return &GormSql{
 		DB: db,
@@ -59,10 +64,29 @@ func (db GormSql) GetTopicByName(name string) (models.Topic, error) {
 	return topic, nil
 }
 
+func (db GormSql) GetTopicByID(id int) (models.Topic, error) {
+	var topic models.Topic
+	err := db.DB.Where("id = ?", id).First(&topic).Error
+
+	if err != nil {
+		return models.Topic{}, err
+	}
+
+	return topic, nil
+}
+
 func (db GormSql) SaveNewTopic(topic models.Topic) error {
 	result := db.DB.Create(&topic)
 	if result.Error != nil {
 		return result.Error
+	}
+	return nil
+}
+
+func (db GormSql) SaveTopic(topic models.Topic) error {
+	err := db.DB.Where("id = ?", topic.ID).Save(topic)
+	if err != nil {
+		return err.Error
 	}
 	return nil
 }
