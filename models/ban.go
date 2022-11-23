@@ -8,9 +8,9 @@ import (
 
 type Ban struct {
 	gorm.Model
-	UserID  int       `json:"userId" form:"userId"`
-	TopicID int       `json:"topicId" form:"topicId"`
-	Ban     time.Time `json:"ban" form:"ban"`
+	UserID    int       `json:"userId" form:"userId"`
+	TopicID   int       `json:"topicId" form:"topicId"`
+	Ban_Until time.Time `json:"ban_until" form:"ban_until"`
 
 	User  User
 	Topic Topic
