@@ -46,3 +46,23 @@ func (db GormSql) Login(email, password string) (models.User, error) {
 	}
 	return user, nil
 }
+
+//Topic
+func (db GormSql) GetTopicByName(name string) (models.Topic, error) {
+	var topic models.Topic
+	err := db.DB.Where("name = ?", name).First(&topic).Error
+
+	if err != nil {
+		return models.Topic{}, err
+	}
+
+	return topic, nil
+}
+
+func (db GormSql) SaveNewTopic(topic models.Topic) error {
+	result := db.DB.Create(&topic)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
