@@ -66,3 +66,16 @@ func (db GormSql) SaveNewTopic(topic models.Topic) error {
 	}
 	return nil
 }
+
+func (db GormSql) SaveNewModerator(userId int, topicId uint) error {
+	var mod models.Moderator
+
+	mod.UserID = userId
+	mod.TopicID = int(topicId)
+
+	result := db.DB.Create(&mod)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
