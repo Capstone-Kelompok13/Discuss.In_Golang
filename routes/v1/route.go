@@ -24,7 +24,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	}
 
 	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins: []string{"https://novalagung.com", "https://www.google.com"},
+		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"OPTIONS", "GET", "POST", "PUT"},
 		AllowedHeaders: []string{"Content-Type", "X-CSRF-Token"},
 		Debug:          true,
