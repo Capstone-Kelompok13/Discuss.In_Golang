@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo-contrib/jaegertracing"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/rs/cors"
 )
 
 func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
@@ -21,6 +22,14 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	uHandler := users.UserHandler{
 		IUserServices: payload.GetUserServices(),
 	}
+
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins: []string{"https://novalagung.com", "https://www.google.com"},
+		AllowedMethods: []string{"OPTIONS", "GET", "POST", "PUT"},
+		AllowedHeaders: []string{"Content-Type", "X-CSRF-Token"},
+		Debug:          true,
+	})
+	e.Use(echo.WrapMiddleware(corsMiddleware.Handler))
 
 	api := e.Group("/api")
 	v1 := api.Group("/v1")
