@@ -138,3 +138,14 @@ func (db GormSql) GetAllPostByTopic(id int) ([]models.Post, error) {
 
 	return posts, nil
 }
+
+func (db GormSql) GetPostById(id int) (models.Post, error) {
+	var post models.Post
+
+	err := db.DB.Where("id = ?", id).Preload("User").Preload("Topic").First(&post).Error
+	if err != nil {
+		return models.Post{}, err
+	}
+
+	return post, nil
+}

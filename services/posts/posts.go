@@ -14,6 +14,7 @@ type IPostServices interface {
 
 	CreatePost(post models.Post) error
 	SeePosts(id int) ([]models.Post, error)
+	SeePost(id int) (models.Post, error)
 }
 
 type postServices struct {
@@ -45,4 +46,13 @@ func (p *postServices) SeePosts(id int) ([]models.Post, error) {
 	}
 
 	return posts, nil
+}
+
+func (p *postServices) SeePost(id int) (models.Post, error) {
+	post, err := p.IDatabase.GetPostById(id)
+	if err != nil {
+		return models.Post{}, err
+	}
+
+	return post, nil
 }

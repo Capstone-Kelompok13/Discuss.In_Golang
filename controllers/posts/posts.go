@@ -4,6 +4,7 @@ import (
 	"discusiin/models"
 	"discusiin/services/posts"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -58,11 +59,6 @@ func (h *PostHandler) SeeAllPost(c echo.Context) error {
 		})
 	}
 
-	// return c.JSON(http.StatusCreated, map[string]interface{}{
-	// 	"message": "success",
-	// 	"data":    id,
-	// })
-
 	posts, err = h.IPostServices.SeePosts(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
@@ -73,5 +69,23 @@ func (h *PostHandler) SeeAllPost(c echo.Context) error {
 	return c.JSON(http.StatusCreated, map[string]interface{}{
 		"message": "success",
 		"data":    posts,
+	})
+}
+
+func (h *PostHandler) SeePost(c echo.Context) error {
+	var p models.Post
+
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	p, err := h.IPostServices.SeePost(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message": "success",
+		"data":    p,
 	})
 }
