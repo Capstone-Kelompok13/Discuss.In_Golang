@@ -37,6 +37,7 @@ func InitDatabase() {
 	err = DB.AutoMigrate(
 		&models.User{},
 		&models.Topic{},
+		&models.Post{},
 	)
 
 	if err != nil {

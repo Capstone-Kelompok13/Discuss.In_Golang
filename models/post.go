@@ -8,13 +8,13 @@ import (
 
 type Post struct {
 	gorm.Model
-	Title       string    `json:"title" form:"title"`
-	Photo       string    `json:"photo" form:"photo"`
-	Description string    `json:"description" form:"description"`
-	UserID      int       `json:"userId" form:"userId"`
-	TopicID     int       `json:"topicId" form:"topicId"`
-	CreatedAt   time.Time `json:"createdAt" form:"createdAt" sql:"DEFAULT:CURRENT_TIMESTAMP"`
-	IsActive    bool      `json:"isActive" form:"isActive"`
+	Title     string    `json:"title" form:"title"`
+	Photo     string    `json:"photo" form:"photo"`
+	Body      string    `json:"body" form:"body"`
+	UserID    int       `json:"userId" form:"userId"`
+	TopicID   int       `json:"topicId" form:"topicId"`
+	CreatedAt time.Time `json:"createdAt" form:"createdAt" sql:"DEFAULT:CURRENT_TIMESTAMP"`
+	IsActive  bool      `json:"isActive" form:"isActive"`
 
 	User  User
 	Topic Topic

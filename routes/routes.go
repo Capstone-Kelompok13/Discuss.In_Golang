@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"discusiin/configs"
 	"discusiin/repositories"
+	pService "discusiin/services/posts"
 	tService "discusiin/services/topics"
 	uService "discusiin/services/users"
 
@@ -18,6 +19,7 @@ type Payload struct {
 	// repoTSql repositories.ITopicDatabase
 	uService uService.IUserServices
 	tService tService.ITopicServices
+	pService pService.IPostServices
 }
 
 func (p *Payload) InitUserService() {
@@ -46,6 +48,7 @@ func (p *Payload) GetUserServices() uService.IUserServices {
 	return p.uService
 }
 
+// Topic -----------------------------------------------------------------------------------------------------------------
 func (p *Payload) GetTopicServices() tService.ITopicServices {
 	if p.tService == nil {
 		p.InitTopicService()
@@ -60,6 +63,23 @@ func (p *Payload) InitTopicService() {
 	}
 
 	p.tService = tService.NewTopicServices(p.repoSql)
+}
+
+// Post -----------------------------------------------------------------------------------------------------------------
+func (p *Payload) GetPostServices() pService.IPostServices {
+	if p.pService == nil {
+		p.InitPostService()
+	}
+
+	return p.pService
+}
+
+func (p *Payload) InitPostService() {
+	if p.repoSql == nil {
+		p.InitRepoMysql()
+	}
+
+	p.pService = pService.NewPostServices(p.repoSql)
 }
 
 // func (p *Payload) InitPocketMessageService() {

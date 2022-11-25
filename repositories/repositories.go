@@ -15,4 +15,6 @@ type IDatabase interface {
 	SaveNewTopic(models.Topic) error
 	SaveTopic(models.Topic) error
 	RemoveTopic(id int) error
+
+	SaveNewPost(post models.Post) error
 }

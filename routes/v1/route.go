@@ -3,6 +3,7 @@ package v1
 import (
 	// "discusiin/controllers/topics"
 
+	"discusiin/controllers/posts"
 	"discusiin/controllers/topics"
 	"discusiin/controllers/users"
 	mid "discusiin/middleware"
@@ -29,6 +30,10 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 		ITopicServices: payload.GetTopicServices(),
 	}
 
+	pHandler := posts.PostHandler{
+		IPostServices: payload.GetPostServices(),
+	}
+
 	api := e.Group("/api")
 	v1 := api.Group("/v1")
 
@@ -50,5 +55,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	// topics.POST("/create", tHandler.CreateNewTopic, middleware.JWTWithConfig(config)) // host:port/api/v1/topics/create
 	// topics.PUT("/:id/edit", tHandler.UpdateDescriptionTopic, middleware.JWTWithConfig(config))
 
+	posts := v1.Group("/posts")
+	posts.POST("/:name/create", pHandler.CreateNewPost)
 	return e, trace
 }

@@ -75,6 +75,7 @@ func (db GormSql) GetTopicByName(name string) (models.Topic, error) {
 
 	if err != nil {
 		return models.Topic{}, err
+		// return models.Topic{}, errors.New("Bangsat")
 	}
 
 	return topic, nil
@@ -109,6 +110,16 @@ func (db GormSql) SaveTopic(topic models.Topic) error {
 
 func (db GormSql) RemoveTopic(id int) error {
 	err := db.DB.Delete(&models.Topic{}, id).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//Post -------------------------------------------------------------------------------------------------------------------------------------------------
+func (db GormSql) SaveNewPost(post models.Post) error {
+	err := db.DB.Create(&post).Error
 	if err != nil {
 		return err
 	}
