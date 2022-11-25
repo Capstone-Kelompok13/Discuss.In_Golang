@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"discusiin/configs"
 	"discusiin/repositories"
+	tService "discusiin/services/topics"
 	uService "discusiin/services/users"
 
 	"gorm.io/gorm"
@@ -16,7 +17,7 @@ type Payload struct {
 	repoSql repositories.IDatabase
 	// repoTSql repositories.ITopicDatabase
 	uService uService.IUserServices
-	// tService tService.ITopicServices
+	tService tService.ITopicServices
 }
 
 func (p *Payload) InitUserService() {
@@ -45,13 +46,22 @@ func (p *Payload) GetUserServices() uService.IUserServices {
 	return p.uService
 }
 
-// func (p *Payload) InitTopicService() {
-// 	if p.repoTSql == nil {
-// 		p.InitRepoMysql()
-// 	}
+func (p *Payload) GetTopicServices() tService.ITopicServices {
+	if p.tService == nil {
+		p.InitTopicService()
+	}
 
-// 	p.tService = tService.NewTopicServices(p.repoTSql)
-// }
+	return p.tService
+}
+
+func (p *Payload) InitTopicService() {
+	if p.repoSql == nil {
+		p.InitRepoMysql()
+	}
+
+	p.tService = tService.NewTopicServices(p.repoSql)
+}
+
 // func (p *Payload) InitPocketMessageService() {
 // 	if p.repoTSql == nil {
 // 		p.InitRepoMysql()

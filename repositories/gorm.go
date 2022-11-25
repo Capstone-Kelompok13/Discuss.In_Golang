@@ -52,7 +52,23 @@ func (db GormSql) Login(email, password string) (models.User, error) {
 	return user, nil
 }
 
-//Topic
+//Topic -------------------------------------------------------------------------------------------------------------------------------------------------
+func (db GormSql) GetAllTopics() ([]models.Topic, error) {
+	var topics []models.Topic
+
+	result := db.DB.Find(&topics)
+
+	if result.Error != nil {
+		return nil, result.Error
+	} else {
+		if result.RowsAffected <= 0 {
+			return nil, result.Error
+		} else {
+			return topics, nil
+		}
+	}
+}
+
 func (db GormSql) GetTopicByName(name string) (models.Topic, error) {
 	var topic models.Topic
 	err := db.DB.Where("name = ?", name).First(&topic).Error
@@ -91,15 +107,11 @@ func (db GormSql) SaveTopic(topic models.Topic) error {
 	return nil
 }
 
-func (db GormSql) SaveNewModerator(userId int, topicId uint) error {
-	var mod models.Moderator
-
-	mod.UserID = userId
-	mod.TopicID = int(topicId)
-
-	result := db.DB.Create(&mod)
-	if result.Error != nil {
-		return result.Error
+func (db GormSql) RemoveTopic(id int) error {
+	err := db.DB.Delete(&models.Topic{}, id).Error
+	if err != nil {
+		return err
 	}
+
 	return nil
 }

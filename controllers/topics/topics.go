@@ -13,6 +13,22 @@ type TopicHandler struct {
 	topics.ITopicServices
 }
 
+func (h *TopicHandler) SeeAllTopics(c echo.Context) error {
+	var topics []models.Topic
+
+	topics, err := h.ITopicServices.SeeTopics()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message": "Success",
+		"data":    topics,
+	})
+}
+
 func (h *TopicHandler) CreateNewTopic(c echo.Context) error {
 	// validation
 	var t models.Topic
@@ -50,6 +66,24 @@ func (h *TopicHandler) CreateNewTopic(c echo.Context) error {
 	})
 }
 
+func (h *TopicHandler) SeeTopic(c echo.Context) error {
+	var topic models.Topic
+
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	topic, err := h.ITopicServices.GetTopic(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message": "success",
+		"data":    topic,
+	})
+}
+
 func (h *TopicHandler) UpdateDescriptionTopic(c echo.Context) error {
 	// validation
 	newTopic := models.Topic{}
@@ -76,5 +110,20 @@ func (h *TopicHandler) UpdateDescriptionTopic(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
 		"message": "topic updated",
+	})
+}
+
+func (h *TopicHandler) DeleteTopic(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	err := h.ITopicServices.RemoveTopic(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "topic deleted",
 	})
 }
