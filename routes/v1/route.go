@@ -59,5 +59,6 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	posts.POST("/:name/create", pHandler.CreateNewPost)
 	posts.GET("/:name", pHandler.SeeAllPost)
 	posts.GET("/:name/:id", pHandler.SeePost)
+	posts.PUT("/:name/:id/edit", pHandler.EditPost)
 	return e, trace
 }

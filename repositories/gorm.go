@@ -149,3 +149,13 @@ func (db GormSql) GetPostById(id int) (models.Post, error) {
 
 	return post, nil
 }
+
+func (db GormSql) SavePost(post models.Post) error {
+	err := db.DB.Save(&post).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
