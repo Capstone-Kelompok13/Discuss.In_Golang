@@ -37,17 +37,6 @@ func (t *topicServices) CreateTopic(topic models.Topic) error {
 		return errors.New("topic already exist")
 	}
 
-	//add creator as moderator if topic created for the first time
-	topicData, err3 := t.IDatabase.GetTopicByName(topic.Name)
-	if err3 != nil {
-		return err3
-	} else {
-		err4 := t.IDatabase.SaveNewModerator(topicData.UserID, topicData.ID)
-		if err4 != nil {
-			return err4
-		}
-	}
-
 	return nil
 }
 
