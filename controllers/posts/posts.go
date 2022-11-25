@@ -109,3 +109,23 @@ func (h *PostHandler) EditPost(c echo.Context) error {
 		"message": "post updated",
 	})
 }
+
+func (h *PostHandler) DeletePost(c echo.Context) error {
+	var newPost models.Post
+	c.Bind(&newPost)
+
+	//check if user is correct
+	// code
+
+	id, _ := strconv.Atoi(c.Param("id"))
+	err := h.IPostServices.DeletePost(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message": "post deleted",
+	})
+}

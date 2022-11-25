@@ -16,6 +16,7 @@ type IPostServices interface {
 	SeePosts(id int) ([]models.Post, error)
 	SeePost(id int) (models.Post, error)
 	UpdatePost(newPost models.Post, id int) error
+	DeletePost(id int) error
 }
 
 type postServices struct {
@@ -68,6 +69,15 @@ func (p *postServices) UpdatePost(newPost models.Post, id int) error {
 	post.Body += newPost.Body
 
 	err = p.IDatabase.SavePost(post)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *postServices) DeletePost(id int) error {
+	err := p.IDatabase.DeletePost(id)
 	if err != nil {
 		return err
 	}

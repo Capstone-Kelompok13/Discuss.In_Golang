@@ -159,3 +159,12 @@ func (db GormSql) SavePost(post models.Post) error {
 
 	return nil
 }
+
+func (db GormSql) DeletePost(id int) error {
+	err := db.DB.Delete(&models.Post{}, id).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
