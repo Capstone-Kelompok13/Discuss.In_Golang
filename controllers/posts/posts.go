@@ -45,3 +45,33 @@ func (h *PostHandler) CreateNewPost(c echo.Context) error {
 		"message": "post created",
 	})
 }
+
+func (h *PostHandler) SeeAllPost(c echo.Context) error {
+	var posts []models.Post
+	name := c.Param("name")
+
+	//find topic
+	id, err := h.IPostServices.GetTopic(name)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": err.Error(),
+		})
+	}
+
+	// return c.JSON(http.StatusCreated, map[string]interface{}{
+	// 	"message": "success",
+	// 	"data":    id,
+	// })
+
+	posts, err = h.IPostServices.SeePosts(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message": "success",
+		"data":    posts,
+	})
+}

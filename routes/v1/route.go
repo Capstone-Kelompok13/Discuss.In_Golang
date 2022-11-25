@@ -57,5 +57,6 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 
 	posts := v1.Group("/posts")
 	posts.POST("/:name/create", pHandler.CreateNewPost)
+	posts.GET("/:name", pHandler.SeeAllPost)
 	return e, trace
 }

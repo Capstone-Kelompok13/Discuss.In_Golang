@@ -126,3 +126,15 @@ func (db GormSql) SaveNewPost(post models.Post) error {
 
 	return nil
 }
+
+func (db GormSql) GetAllPostByTopic(id int) ([]models.Post, error) {
+	var posts []models.Post
+
+	//find topic id
+	err := db.DB.Where("topic_id = ?", id).Preload("User").Preload("Topic").Find(&posts).Error
+	if err != nil {
+		return []models.Post{}, nil
+	}
+
+	return posts, nil
+}

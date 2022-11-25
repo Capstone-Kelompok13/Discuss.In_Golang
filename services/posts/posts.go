@@ -13,6 +13,7 @@ type IPostServices interface {
 	GetTopic(name string) (int, error)
 
 	CreatePost(post models.Post) error
+	SeePosts(id int) ([]models.Post, error)
 }
 
 type postServices struct {
@@ -35,4 +36,13 @@ func (p *postServices) CreatePost(post models.Post) error {
 	}
 
 	return nil
+}
+
+func (p *postServices) SeePosts(id int) ([]models.Post, error) {
+	posts, err := p.IDatabase.GetAllPostByTopic(id)
+	if err != nil {
+		return []models.Post{}, err
+	}
+
+	return posts, nil
 }

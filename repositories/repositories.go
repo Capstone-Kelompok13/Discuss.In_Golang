@@ -17,4 +17,5 @@ type IDatabase interface {
 	RemoveTopic(id int) error
 
 	SaveNewPost(post models.Post) error
+	GetAllPostByTopic(id int) ([]models.Post, error)
 }
