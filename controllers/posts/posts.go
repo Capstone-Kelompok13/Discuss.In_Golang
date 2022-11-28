@@ -129,3 +129,75 @@ func (h *PostHandler) DeletePost(c echo.Context) error {
 		"message": "post deleted",
 	})
 }
+
+func (h *PostHandler) CreateComment(c echo.Context) error {
+	var comment models.Comment
+	c.Bind(&comment)
+
+	//get logged userId
+	// code here
+	comment.UserID = 1 //untuk percobaan
+
+	id, _ := strconv.Atoi(c.Param("id"))
+	err := h.IPostServices.CreateComment(comment, id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message": "Comment Created",
+	})
+
+	// //find post if post exist
+	// id, _ := strconv.Atoi(c.Param("id"))
+	// post, err := h.IPostServices.SeePost(id)
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+	// 		"message": err.Error(),
+	// 	})
+	// }
+
+	// //get logged userId
+	// // code here
+	// comment.UserID = 1 //untuk percobaan
+
+}
+
+func (h *PostHandler) UpdateComment(c echo.Context) error {
+	var comment models.Comment
+	c.Bind(&comment)
+
+	//get logged userId
+	// code here
+	userId := 1 //untuk percobaan
+
+	//check if user who eligible
+	co, _ := strconv.Atoi(c.Param("c")) //untuk param comment
+	id, _ := strconv.Atoi(c.Param("id"))
+	err := h.IPostServices.UpdateComment(comment, id, co, userId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message": "Comment Updated",
+	})
+
+	// //find post if post exist
+	// id, _ := strconv.Atoi(c.Param("id"))
+	// post, err := h.IPostServices.SeePost(id)
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+	// 		"message": err.Error(),
+	// 	})
+	// }
+
+	// //get logged userId
+	// // code here
+	// comment.UserID = 1 //untuk percobaan
+
+}

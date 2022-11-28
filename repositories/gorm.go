@@ -75,7 +75,7 @@ func (db GormSql) GetTopicByName(name string) (models.Topic, error) {
 
 	if err != nil {
 		return models.Topic{}, err
-		// return models.Topic{}, errors.New("Bangsat")
+		// return models.Topic{}, errors.New("")
 	}
 
 	return topic, nil
@@ -162,6 +162,45 @@ func (db GormSql) SavePost(post models.Post) error {
 
 func (db GormSql) DeletePost(id int) error {
 	err := db.DB.Delete(&models.Post{}, id).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//Comment -------------------------------------------------------------------------------------------------------------------------------------------------
+func (db GormSql) SaveNewComment(comment models.Comment) error {
+	err := db.DB.Create(&comment).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db GormSql) GetCommentById(co int) (models.Comment, error) {
+	var comment models.Comment
+
+	err := db.DB.Where("id = ?", co).First(&comment).Error
+	if err != nil {
+		return models.Comment{}, err
+	}
+
+	return comment, nil
+}
+
+func (db GormSql) SaveComment(comment models.Comment) error {
+	err := db.DB.Save(&comment).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db GormSql) DeleteComment(co int) error {
+	err := db.DB.Delete(&models.Comment{}, co).Error
 	if err != nil {
 		return err
 	}
