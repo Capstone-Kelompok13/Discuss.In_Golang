@@ -4,17 +4,22 @@ import (
 	"database/sql"
 	"discusiin/configs"
 	"discusiin/repositories"
+	pService "discusiin/services/posts"
+	tService "discusiin/services/topics"
 	uService "discusiin/services/users"
 
 	"gorm.io/gorm"
 )
 
 type Payload struct {
-	Config   *configs.Config
-	DBGorm   *gorm.DB
-	DBSql    *sql.DB
-	repoSql  repositories.IDatabase
+	Config  *configs.Config
+	DBGorm  *gorm.DB
+	DBSql   *sql.DB
+	repoSql repositories.IDatabase
+	// repoTSql repositories.ITopicDatabase
 	uService uService.IUserServices
+	tService tService.ITopicServices
+	pService pService.IPostServices
 }
 
 func (p *Payload) InitUserService() {
@@ -42,3 +47,52 @@ func (p *Payload) GetUserServices() uService.IUserServices {
 	}
 	return p.uService
 }
+
+// Topic -----------------------------------------------------------------------------------------------------------------
+func (p *Payload) GetTopicServices() tService.ITopicServices {
+	if p.tService == nil {
+		p.InitTopicService()
+	}
+
+	return p.tService
+}
+
+func (p *Payload) InitTopicService() {
+	if p.repoSql == nil {
+		p.InitRepoMysql()
+	}
+
+	p.tService = tService.NewTopicServices(p.repoSql)
+}
+
+// Post -----------------------------------------------------------------------------------------------------------------
+func (p *Payload) GetPostServices() pService.IPostServices {
+	if p.pService == nil {
+		p.InitPostService()
+	}
+
+	return p.pService
+}
+
+func (p *Payload) InitPostService() {
+	if p.repoSql == nil {
+		p.InitRepoMysql()
+	}
+
+	p.pService = pService.NewPostServices(p.repoSql)
+}
+
+// func (p *Payload) InitPocketMessageService() {
+// 	if p.repoTSql == nil {
+// 		p.InitRepoMysql()
+// 	}
+
+// 	p.tService = tService.NewTopicServices(p.repoTSql)
+// }
+
+// func (p *Payload) GetTopicServices() tService.ITopicServices {
+// 	if p.tService == nil {
+// 		p.InitTopicService()
+// 	}
+// 	return p.tService
+// }

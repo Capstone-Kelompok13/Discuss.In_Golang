@@ -10,6 +10,11 @@ type GormSql struct {
 	DB *gorm.DB
 }
 
+// // SaveTopic implements IDatabase
+// func (*GormSql) SaveTopic(models.Topic) error {
+// 	panic("unimplemented")
+// }
+
 func NewGorm(db *gorm.DB) IDatabase {
 	return &GormSql{
 		DB: db,
@@ -45,4 +50,170 @@ func (db GormSql) Login(email, password string) (models.User, error) {
 		return models.User{}, err
 	}
 	return user, nil
+}
+
+//Topic -------------------------------------------------------------------------------------------------------------------------------------------------
+func (db GormSql) GetAllTopics() ([]models.Topic, error) {
+	var topics []models.Topic
+
+	result := db.DB.Find(&topics)
+
+	if result.Error != nil {
+		return nil, result.Error
+	} else {
+		if result.RowsAffected <= 0 {
+			return nil, result.Error
+		} else {
+			return topics, nil
+		}
+	}
+}
+
+func (db GormSql) GetTopicByName(name string) (models.Topic, error) {
+	var topic models.Topic
+	err := db.DB.Where("name = ?", name).First(&topic).Error
+
+	if err != nil {
+		return models.Topic{}, err
+		// return models.Topic{}, errors.New("")
+	}
+
+	return topic, nil
+}
+
+func (db GormSql) GetTopicByID(id int) (models.Topic, error) {
+	var topic models.Topic
+	err := db.DB.Where("id = ?", id).First(&topic).Error
+
+	if err != nil {
+		return models.Topic{}, err
+	}
+
+	return topic, nil
+}
+
+func (db GormSql) SaveNewTopic(topic models.Topic) error {
+	result := db.DB.Create(&topic)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func (db GormSql) SaveTopic(topic models.Topic) error {
+	err := db.DB.Where("id = ?", topic.ID).Save(topic)
+	if err != nil {
+		return err.Error
+	}
+	return nil
+}
+
+func (db GormSql) RemoveTopic(id int) error {
+	err := db.DB.Delete(&models.Topic{}, id).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//Post -------------------------------------------------------------------------------------------------------------------------------------------------
+func (db GormSql) SaveNewPost(post models.Post) error {
+	err := db.DB.Create(&post).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db GormSql) GetAllPostByTopic(id int) ([]models.Post, error) {
+	var posts []models.Post
+
+	//find topic id
+	err := db.DB.Where("topic_id = ?", id).Preload("User").Preload("Topic").Find(&posts).Error
+	if err != nil {
+		return []models.Post{}, nil
+	}
+
+	return posts, nil
+}
+
+func (db GormSql) GetPostById(id int) (models.Post, error) {
+	var post models.Post
+
+	err := db.DB.Where("id = ?", id).Preload("User").Preload("Topic").First(&post).Error
+	if err != nil {
+		return models.Post{}, err
+	}
+
+	return post, nil
+}
+
+func (db GormSql) SavePost(post models.Post) error {
+	err := db.DB.Save(&post).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db GormSql) DeletePost(id int) error {
+	err := db.DB.Delete(&models.Post{}, id).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db GormSql) GetPostByIdWithAll(id int) (models.Post, error) {
+	var post models.Post
+	err := db.DB.Model(&models.Post{}).Where("id = ?", id).Preload("Comments").Find(&post).Error
+	if err != nil {
+		return models.Post{}, err
+	}
+
+	return post, nil
+}
+
+//Comment -------------------------------------------------------------------------------------------------------------------------------------------------
+func (db GormSql) SaveNewComment(comment models.Comment) error {
+	err := db.DB.Create(&comment).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db GormSql) GetCommentById(co int) (models.Comment, error) {
+	var comment models.Comment
+
+	err := db.DB.Where("id = ?", co).First(&comment).Error
+	if err != nil {
+		return models.Comment{}, err
+	}
+
+	return comment, nil
+}
+
+func (db GormSql) SaveComment(comment models.Comment) error {
+	err := db.DB.Save(&comment).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db GormSql) DeleteComment(co int) error {
+	err := db.DB.Delete(&models.Comment{}, co).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

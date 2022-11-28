@@ -9,7 +9,7 @@ type Comment struct {
 	UserID     int    `json:"userId" form:"userId"`
 	PostID     int    `json:"postId" form:"postId"`
 	Body       string `json:"body" form:"body"`
-	IsFollowed string `json:"isFollowed" form:"isFollowed"`
+	IsFollowed bool   `json:"isFollowed" form:"isFollowed"`
 
 	User User
 	Post Post
