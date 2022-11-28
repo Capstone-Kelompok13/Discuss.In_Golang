@@ -21,6 +21,7 @@ type IDatabase interface {
 	GetPostById(id int) (models.Post, error)
 	SavePost(post models.Post) error
 	DeletePost(id int) error
+	GetPostByIdWithAll(id int) (models.Post, error)
 
 	SaveNewComment(comment models.Comment) error
 	GetCommentById(co int) (models.Comment, error)

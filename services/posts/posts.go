@@ -56,7 +56,7 @@ func (p *postServices) SeePosts(id int) ([]models.Post, error) {
 }
 
 func (p *postServices) SeePost(id int) (models.Post, error) {
-	post, err := p.IDatabase.GetPostById(id)
+	post, err := p.IDatabase.GetPostByIdWithAll(id)
 	if err != nil {
 		return models.Post{}, err
 	}

@@ -38,6 +38,7 @@ func InitDatabase() {
 		&models.User{},
 		&models.Topic{},
 		&models.Post{},
+		&models.Comment{},
 	)
 
 	if err != nil {

@@ -16,8 +16,9 @@ type Post struct {
 	CreatedAt time.Time `json:"createdAt" form:"createdAt" sql:"DEFAULT:CURRENT_TIMESTAMP"`
 	IsActive  bool      `json:"isActive" form:"isActive"`
 
-	User  User
-	Topic Topic
+	Comment []Comment
+	User    User
+	Topic   Topic
 }
 
 func (Post) TableName() string {
