@@ -171,7 +171,7 @@ func (db GormSql) DeletePost(id int) error {
 
 func (db GormSql) GetPostByIdWithAll(id int) (models.Post, error) {
 	var post models.Post
-	err := db.DB.Where("id = ?", id).Preload("Comment").Find(&post).Error
+	err := db.DB.Model(&models.Post{}).Where("id = ?", id).Preload("Comments").Find(&post).Error
 	if err != nil {
 		return models.Post{}, err
 	}
