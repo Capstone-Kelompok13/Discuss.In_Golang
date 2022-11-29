@@ -189,3 +189,22 @@ func (h *PostHandler) UpdateComment(c echo.Context) error {
 	// comment.UserID = 1 //untuk percobaan
 
 }
+
+func (h *PostHandler) DeleteComment(c echo.Context) error {
+	//get logged userId
+	// code here
+	userId := 1 //untuk percobaan
+
+	//check if user who eligible
+	co, _ := strconv.Atoi(c.Param("c")) //untuk param comment
+	err := h.IPostServices.DeleteComment(co, userId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message": "Comment Deleted",
+	})
+}
