@@ -4,6 +4,7 @@ import (
 	"discusiin/models"
 	"discusiin/repositories"
 	"errors"
+	"time"
 )
 
 func NewPostServices(db repositories.IDatabase) IPostServices {
@@ -38,6 +39,8 @@ func (p *postServices) GetTopic(name string) (int, error) {
 }
 
 func (p *postServices) CreatePost(post models.Post) error {
+	//epoch time
+	post.CreatedAt = int(time.Now().UnixMilli())
 	err := p.IDatabase.SaveNewPost(post)
 	if err != nil {
 		return err
