@@ -23,19 +23,7 @@ func (h *PostHandler) CreateNewPost(c echo.Context) error {
 	// code here
 	p.UserID = 1 //untuk percobaan
 
-	//find topic
-	id, err := h.IPostServices.GetTopic(name)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
-	}
-	p.TopicID = id
-
-	//init field isActive
-	p.IsActive = true
-
-	err = h.IPostServices.CreatePost(p)
+	err := h.IPostServices.CreatePost(p, name)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),

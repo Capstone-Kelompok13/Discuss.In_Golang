@@ -14,7 +14,7 @@ func NewPostServices(db repositories.IDatabase) IPostServices {
 type IPostServices interface {
 	GetTopic(name string) (int, error)
 
-	CreatePost(post models.Post) error
+	CreatePost(post models.Post, name string) error
 	SeePosts(id int) ([]models.Post, error)
 	SeePost(id int) (models.Post, error)
 	UpdatePost(newPost models.Post, id int) error
@@ -38,10 +38,22 @@ func (p *postServices) GetTopic(name string) (int, error) {
 	return int(topic.ID), nil
 }
 
-func (p *postServices) CreatePost(post models.Post) error {
+func (p *postServices) CreatePost(post models.Post, name string) error {
+	//find topic
+	topic, err := p.IDatabase.GetTopicByName(name)
+	if err != nil {
+		return err
+	}
+
+	//insert topic id and is active
+	post.TopicID = int(topic.ID)
+	post.IsActive = true
+
 	//epoch time
 	post.CreatedAt = int(time.Now().UnixMilli())
-	err := p.IDatabase.SaveNewPost(post)
+
+	//save post
+	err = p.IDatabase.SaveNewPost(post)
 	if err != nil {
 		return err
 	}
