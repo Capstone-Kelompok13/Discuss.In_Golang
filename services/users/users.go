@@ -6,6 +6,9 @@ import (
 	"discusiin/models"
 	"discusiin/repositories"
 	"errors"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 func NewUserServices(db repositories.IDatabase) IUserServices {
@@ -28,10 +31,10 @@ func (s *userServices) Register(user models.User) error {
 		if err1.Error() == "record not found" {
 			err2 := s.IDatabase.SaveNewUser(user)
 			if err2 != nil {
-				return err2
+				return echo.NewHTTPError(http.StatusInternalServerError, err2.Error())
 			}
 		} else {
-			return err1
+			return echo.NewHTTPError(http.StatusInternalServerError, err1.Error())
 		}
 	} else {
 		// if getUserByUsername got no error
@@ -43,18 +46,26 @@ func (s *userServices) Login(user models.User) (dto.Login, error) {
 
 	user, err := s.IDatabase.Login(user.Email, user.Password)
 	if err != nil {
-		return dto.Login{}, err
+		if err.Error() == "record not found" {
+			return dto.Login{}, echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return dto.Login{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	token, err := middleware.GetToken(user.ID, user.Username)
 	if err != nil {
-		return dto.Login{}, err
+		return dto.Login{}, echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 	}
 
-	var result dto.Login
-	result.ID = user.ID
-	result.Username = user.Username
-	result.Token = token
+	result := dto.Login{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+		Photo:    user.Photo,
+		BanUntil: user.BanUntil,
+		IsAdmin:  user.IsAdmin,
+		Token:    token,
+	}
 
 	return result, nil
 }

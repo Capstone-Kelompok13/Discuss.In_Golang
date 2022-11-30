@@ -58,9 +58,7 @@ func (h *UserHandler) Register(c echo.Context) error {
 
 	err = h.IUserServices.Register(u)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
+		return err
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
@@ -73,34 +71,24 @@ func (h *UserHandler) Login(c echo.Context) error {
 	var u models.User
 	err := c.Bind(&u)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	if u.Email == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "email should not be empty",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "email should not be empty")
 	}
 	// isEmailValid?
 	valid := helper.IsEmailValid(u.Email)
 	if !valid {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "email invalid",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "email invalid")
 	}
 	if u.Password == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "password should not be empty",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "password should not be empty")
 	}
 
 	result, err := h.IUserServices.Login(u)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
+		return err
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
