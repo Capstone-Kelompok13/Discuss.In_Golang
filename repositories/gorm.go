@@ -120,7 +120,14 @@ func (db GormSql) SaveNewPost(post models.Post) error {
 
 	return nil
 }
-
+func (db GormSql) GetRecentPost() ([]models.Post, error) {
+	var result []models.Post
+	err := db.DB.Order("created_at DESC").Limit(20).Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
 func (db GormSql) GetAllPostByTopic(id int) ([]models.Post, error) {
 	var posts []models.Post
 

@@ -146,3 +146,14 @@ func (h *PostHandler) DeletePost(c echo.Context) error {
 		"message": "post deleted",
 	})
 }
+
+func (h *PostHandler) GetRecentPost(c echo.Context) error {
+	posts, err := h.IPostServices.GetRecentPost()
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "success",
+		"data":    posts,
+	})
+}

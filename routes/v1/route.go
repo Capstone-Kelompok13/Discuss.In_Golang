@@ -6,7 +6,7 @@ import (
 	"discusiin/configs"
 	"discusiin/controllers/comments"
 	"discusiin/controllers/posts"
-	"discusiin/controllers/replys"
+	"discusiin/controllers/replies"
 	"discusiin/controllers/topics"
 	"discusiin/controllers/users"
 	mid "discusiin/middleware"
@@ -49,7 +49,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 		ICommentServices: payload.GetCommentServices(),
 	}
 
-	rHandler := replys.ReplyHandler{
+	rHandler := replies.ReplyHandler{
 		IReplyServices: payload.GetReplyServices(),
 	}
 
@@ -73,6 +73,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	posts := v1.Group("/posts")
 	posts.POST("/create/:topic_name", pHandler.CreateNewPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	posts.GET("/all/:topic_name", pHandler.GetAllPost)
+	posts.GET("/recent", pHandler.GetRecentPost)
 	posts.GET("/:post_id", pHandler.GetPost)
 	posts.PUT("/edit/:post_id", pHandler.EditPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	posts.DELETE("/delete/:post_id", pHandler.DeletePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))

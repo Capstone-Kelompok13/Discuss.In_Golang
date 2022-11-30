@@ -5,7 +5,10 @@ import (
 	"discusiin/models"
 	"discusiin/repositories"
 	"errors"
+	"net/http"
 	"time"
+
+	"github.com/labstack/echo/v4"
 )
 
 func NewPostServices(db repositories.IDatabase) IPostServices {
@@ -20,6 +23,7 @@ type IPostServices interface {
 	GetPost(id int) (dto.PublicPost, error)
 	UpdatePost(newPost models.Post, id int, token dto.Token) error
 	DeletePost(id int, token dto.Token) error
+	GetRecentPost() ([]dto.PublicPost, error)
 }
 
 type postServices struct {
@@ -155,4 +159,27 @@ func (p *postServices) DeletePost(id int, token dto.Token) error {
 	}
 
 	return nil
+}
+
+func (p *postServices) GetRecentPost() ([]dto.PublicPost, error) {
+	posts, err := p.IDatabase.GetRecentPost()
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	var result []dto.PublicPost
+	for _, post := range posts {
+		result = append(result, dto.PublicPost{
+			Model:     post.Model,
+			Title:     post.Title,
+			Photo:     post.Photo,
+			Body:      post.Body,
+			UserID:    post.UserID,
+			TopicID:   post.TopicID,
+			CreatedAt: post.CreatedAt,
+			IsActive:  post.IsActive,
+		})
+	}
+
+	return result, nil
 }

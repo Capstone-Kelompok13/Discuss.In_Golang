@@ -1,4 +1,4 @@
-package replys
+package replies
 
 import (
 	"discusiin/dto"

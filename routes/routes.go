@@ -6,7 +6,7 @@ import (
 	"discusiin/repositories"
 	cService "discusiin/services/comments"
 	pService "discusiin/services/posts"
-	rService "discusiin/services/replys"
+	rService "discusiin/services/replies"
 	tService "discusiin/services/topics"
 	uService "discusiin/services/users"
 

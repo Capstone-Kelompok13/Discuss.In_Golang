@@ -1,9 +1,9 @@
-package replys
+package replies
 
 import (
 	"discusiin/helper"
 	"discusiin/models"
-	"discusiin/services/replys"
+	"discusiin/services/replies"
 	"net/http"
 	"strconv"
 
@@ -11,7 +11,7 @@ import (
 )
 
 type ReplyHandler struct {
-	replys.IReplyServices
+	replies.IReplyServices
 }
 
 func (h *ReplyHandler) CreateReply(c echo.Context) error {
