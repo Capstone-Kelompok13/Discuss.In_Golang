@@ -69,8 +69,8 @@ func (h *CommentHandler) GetAllComment(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "Succes",
-		"data":    comments,
+		"message":      "Succes",
+		"data_comment": comments,
 	})
 }
 

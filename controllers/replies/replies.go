@@ -71,8 +71,8 @@ func (h *ReplyHandler) GetAllReply(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "Succes",
-		"data":    replys,
+		"message":    "Succes",
+		"data_reply": replys,
 	})
 }
 

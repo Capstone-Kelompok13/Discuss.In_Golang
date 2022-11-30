@@ -54,8 +54,8 @@ func (h *PostHandler) GetAllPost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "success",
-		"data":    posts,
+		"message":   "success",
+		"data_post": posts,
 	})
 }
 
@@ -76,8 +76,8 @@ func (h *PostHandler) GetPost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "success",
-		"data":    p,
+		"message":   "success",
+		"data_post": p,
 	})
 }
 
@@ -153,7 +153,7 @@ func (h *PostHandler) GetRecentPost(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"message": "success",
-		"data":    posts,
+		"message":   "success",
+		"data_post": posts,
 	})
 }
