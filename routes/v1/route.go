@@ -4,6 +4,7 @@ import (
 	// "discusiin/controllers/topics"
 
 	"discusiin/configs"
+	"discusiin/controllers/comments"
 	"discusiin/controllers/posts"
 	"discusiin/controllers/topics"
 	"discusiin/controllers/users"
@@ -36,6 +37,10 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 		IPostServices: payload.GetPostServices(),
 	}
 
+	cHandler := comments.CommentHandler{
+		ICommentServices: payload.GetCommentServices(),
+	}
+
 	// corsMiddleware := cors.New(cors.Options{
 	// 	AllowedOrigins: []string{"*"},
 	// 	AllowedMethods: []string{"OPTIONS", "GET", "POST", "PUT"},
@@ -65,11 +70,23 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	// topics.PUT("/:id/edit", tHandler.UpdateDescriptionTopic)
 	topics.DELETE("/:id", tHandler.DeleteTopic)
 
+	// //endpoints comment
+	// topics.GET("/:id/comments", cHandler.SeeAllComment)          // host:port/api/v1/topics/1/comments
+	// topics.POST("/:id/comments/create", cHandler.CreateComment)  // host:port/api/v1/topics/1/comments/create
+	// topics.PUT("/:id/comments/:co/edit", cHandler.UpdateComment) // host:port/api/v1/topics/1/comments/1/edit
+	// topics.DELETE("/:id/comments/:co", cHandler.DeleteComment)   // host:port/api/v1/topics/1/comments/1
+
 	posts := v1.Group("/posts")
 	posts.POST("/:name/create", pHandler.CreateNewPost)
 	posts.GET("/:name", pHandler.SeeAllPost)
 	posts.GET("/:name/:id", pHandler.SeePost)
 	posts.PUT("/:name/:id/edit", pHandler.EditPost)
 	posts.DELETE("/:name/:id", pHandler.DeletePost)
+
+	//endpoints comment
+	posts.GET("/:name/:id/comments", cHandler.SeeAllComment)          // host:port/api/v1/topics/1/comments
+	posts.POST("/:name/:id/comments/create", cHandler.CreateComment)  // host:port/api/v1/topics/1/comments/create
+	posts.PUT("/:name/:id/comments/:co/edit", cHandler.UpdateComment) // host:port/api/v1/topics/1/comments/1/edit
+	posts.DELETE("/:name/:id/comments/:co", cHandler.DeleteComment)   // host:port/api/v1/topics/1/comments/1
 	return e, trace
 }
