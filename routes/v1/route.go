@@ -6,6 +6,7 @@ import (
 	"discusiin/configs"
 	"discusiin/controllers/comments"
 	"discusiin/controllers/posts"
+	"discusiin/controllers/replys"
 	"discusiin/controllers/topics"
 	"discusiin/controllers/users"
 	mid "discusiin/middleware"
@@ -48,6 +49,10 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 		ICommentServices: payload.GetCommentServices(),
 	}
 
+	rHandler := replys.ReplyHandler{
+		IReplyServices: payload.GetReplyServices(),
+	}
+
 	api := e.Group("/api")
 	v1 := api.Group("/v1")
 
@@ -78,6 +83,13 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	comments.POST("/create/:post_id", cHandler.CreateComment, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	comments.PUT("/edit/:comment_id", cHandler.UpdateComment, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	comments.DELETE("/delete/:comment_id", cHandler.DeleteComment, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+
+	//endpoints reply
+	replys := comments.Group("/replys")
+	replys.GET("/:comment_id", rHandler.GetAllReply)
+	replys.POST("/create/:comment_id", rHandler.CreateReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	replys.PUT("/edit/:reply_id", rHandler.UpdateReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	replys.DELETE("/delete/:reply_id", rHandler.DeleteReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
 	return e, trace
 }

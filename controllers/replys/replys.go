@@ -1,22 +1,23 @@
-package comments
+package replys
 
 import (
 	"discusiin/helper"
 	"discusiin/models"
-	comments "discusiin/services/comments"
+	"discusiin/services/replys"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
 
-type CommentHandler struct {
-	comments.ICommentServices
+type ReplyHandler struct {
+	replys.IReplyServices
 }
 
-func (h *CommentHandler) CreateComment(c echo.Context) error {
-	var comment models.Comment
-	errBind := c.Bind(&comment)
+func (h *ReplyHandler) CreateReply(c echo.Context) error {
+	var reply models.Reply
+	// c.Bind(&reply)
+	errBind := c.Bind(&reply)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": errBind.Error(),
@@ -30,15 +31,17 @@ func (h *CommentHandler) CreateComment(c echo.Context) error {
 			"message": errDecodeJWT.Error(),
 		})
 	}
+	// reply.UserID = 1 //untuk percobaan
 
-	postID, errAtoi := strconv.Atoi(c.Param("post_id"))
+	//get comment id
+	commentId, errAtoi := strconv.Atoi(c.Param("comment_id"))
 	if errAtoi != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": errAtoi.Error(),
 		})
 	}
 
-	err := h.ICommentServices.CreateComment(comment, postID, token)
+	err := h.IReplyServices.CreateReply(reply, commentId, token)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -46,40 +49,40 @@ func (h *CommentHandler) CreateComment(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "Comment Created",
+		"message": "Reply Created",
 	})
-
 }
 
-func (h *CommentHandler) GetAllComment(c echo.Context) error {
-
-	//get post id
-	postID, errAtoi := strconv.Atoi(c.Param("post_id"))
+func (h *ReplyHandler) GetAllReply(c echo.Context) error {
+	//get comment id
+	commentId, errAtoi := strconv.Atoi(c.Param("comment_id"))
 	if errAtoi != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": errAtoi.Error(),
 		})
 	}
-	//get all coment from post
-	comments, err := h.ICommentServices.GetAllComments(postID)
+
+	//get all reply from comment
+	replys, err := h.IReplyServices.GetAllReply(commentId)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
 		"message": "Succes",
-		"data":    comments,
+		"data":    replys,
 	})
 }
 
-func (h *CommentHandler) UpdateComment(c echo.Context) error {
-	var comment models.Comment
-	errBind := c.Bind(&comment)
+func (h *ReplyHandler) UpdateReply(c echo.Context) error {
+	var newReply models.Reply
+	errBind := c.Bind(&newReply)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": errBind.Error(),
+			// "message": errors.New("hallo semuanya"),
 		})
 	}
 
@@ -88,49 +91,52 @@ func (h *CommentHandler) UpdateComment(c echo.Context) error {
 	if errDecodeJWT != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": errDecodeJWT.Error(),
+			// "message": errors.New("hai"),
 		})
 	}
 
-	//check if user who eligibleuntuk param comment
-	commentID, errAtoi := strconv.Atoi(c.Param("comment_id"))
+	//get reply id
+	replyId, errAtoi := strconv.Atoi(c.Param("reply_id"))
 	if errAtoi != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": errAtoi.Error(),
 		})
 	}
 
-	comment.ID = uint(commentID)
-
-	err := h.ICommentServices.UpdateComment(comment, token)
+	//update reply
+	err := h.IReplyServices.UpdateReply(newReply, replyId, token)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
+			// "message": errors.New("hallo semua"),
 		})
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "Comment Updated",
+		"message": "Reply Updated",
 	})
-
 }
 
-func (h *CommentHandler) DeleteComment(c echo.Context) error {
+func (h *ReplyHandler) DeleteReply(c echo.Context) error {
 	//get logged userId
 	token, errDecodeJWT := helper.DecodeJWT(c)
 	if errDecodeJWT != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": errDecodeJWT.Error(),
+			// "message": errors.New("hai"),
 		})
 	}
 
-	//check if user who eligible
-	commentID, errAtoi := strconv.Atoi(c.Param("comment_id"))
+	//get reply id
+	replyId, errAtoi := strconv.Atoi(c.Param("reply_id"))
 	if errAtoi != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": errAtoi.Error(),
 		})
 	}
-	err := h.ICommentServices.DeleteComment(commentID, token)
+
+	//delete reply
+	err := h.IReplyServices.DeleteReply(replyId, token)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -138,6 +144,6 @@ func (h *CommentHandler) DeleteComment(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "Comment Deleted",
+		"message": "Reply Deleted",
 	})
 }
