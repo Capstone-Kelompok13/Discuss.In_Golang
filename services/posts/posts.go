@@ -80,7 +80,9 @@ func (p *postServices) GetPosts(name string) ([]dto.PublicPost, error) {
 			Photo:     v.Photo,
 			Body:      v.Body,
 			UserID:    v.UserID,
+			Username:  v.User.Username,
 			TopicID:   v.TopicID,
+			Topicname: v.Topic.Name,
 			CreatedAt: v.CreatedAt,
 			IsActive:  v.IsActive,
 		})
@@ -103,7 +105,9 @@ func (p *postServices) GetPost(id int) (dto.PublicPost, error) {
 		Photo:     post.Photo,
 		Body:      post.Body,
 		UserID:    post.UserID,
+		Username:  post.User.Username,
 		TopicID:   post.TopicID,
+		Topicname: post.Topic.Name,
 		CreatedAt: post.CreatedAt,
 		IsActive:  post.IsActive,
 	}
@@ -175,7 +179,9 @@ func (p *postServices) GetRecentPost() ([]dto.PublicPost, error) {
 			Photo:     post.Photo,
 			Body:      post.Body,
 			UserID:    post.UserID,
+			Username:  post.User.Username,
 			TopicID:   post.TopicID,
+			Topicname: post.Topic.Name,
 			CreatedAt: post.CreatedAt,
 			IsActive:  post.IsActive,
 		})

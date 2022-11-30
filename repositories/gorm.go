@@ -122,7 +122,7 @@ func (db GormSql) SaveNewPost(post models.Post) error {
 }
 func (db GormSql) GetRecentPost() ([]models.Post, error) {
 	var result []models.Post
-	err := db.DB.Order("created_at DESC").Limit(20).Find(&result).Error
+	err := db.DB.Order("created_at DESC").Preload("User").Preload("Topic").Limit(20).Find(&result).Error
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (db GormSql) GetAllPostByTopic(id int) ([]models.Post, error) {
 	var posts []models.Post
 
 	//find topic id
-	err := db.DB.Where("topic_id = ?", id).Preload("User").Preload("Topic").Find(&posts).Error
+	err := db.DB.Where("topic_id = ?", id).Order("created_at DESC").Preload("User").Preload("Topic").Find(&posts).Error
 	if err != nil {
 		return []models.Post{}, nil
 	}
