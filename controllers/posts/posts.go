@@ -39,15 +39,7 @@ func (h *PostHandler) SeeAllPost(c echo.Context) error {
 	var posts []models.Post
 	name := c.Param("name")
 
-	//find topic
-	id, err := h.IPostServices.GetTopic(name)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
-	}
-
-	posts, err = h.IPostServices.SeePosts(id)
+	posts, err := h.IPostServices.SeePosts(name)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -82,11 +74,11 @@ func (h *PostHandler) EditPost(c echo.Context) error {
 	var newPost models.Post
 	c.Bind(&newPost)
 
-	//check if user is correct
-	// code
+	//get user id from logged user
+	userId := 1 //sebagai percobaan
 
 	id, _ := strconv.Atoi(c.Param("id"))
-	err := h.IPostServices.UpdatePost(newPost, id)
+	err := h.IPostServices.UpdatePost(newPost, id, userId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -102,11 +94,11 @@ func (h *PostHandler) DeletePost(c echo.Context) error {
 	var newPost models.Post
 	c.Bind(&newPost)
 
-	//check if user is correct
-	// code
+	//get user id from logged user
+	userId := 1 //sebagai percobaan
 
 	id, _ := strconv.Atoi(c.Param("id"))
-	err := h.IPostServices.DeletePost(id)
+	err := h.IPostServices.DeletePost(id, userId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
