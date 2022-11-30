@@ -1,6 +1,7 @@
 package posts
 
 import (
+	"discusiin/dto"
 	"discusiin/models"
 	"discusiin/repositories"
 	"errors"
@@ -11,24 +12,25 @@ func NewCommentServices(db repositories.IDatabase) ICommentServices {
 }
 
 type ICommentServices interface {
-	CreateComment(comment models.Comment, id int) error
-	SeeAllComments(id int) ([]models.Comment, error)
-	UpdateComment(newComment models.Comment, id int, co int, userId int) error
-	DeleteComment(userId int, co int) error
+	CreateComment(comment models.Comment, post_id int, token dto.Token) error
+	GetAllComments(id int) ([]dto.PublicComment, error)
+	UpdateComment(newComment models.Comment, token dto.Token) error
+	DeleteComment(commentID int, token dto.Token) error
 }
 
 type commentServices struct {
 	repositories.IDatabase
 }
 
-func (c *commentServices) CreateComment(comment models.Comment, id int) error {
+func (c *commentServices) CreateComment(comment models.Comment, postID int, token dto.Token) error {
 	//get post
-	post, err := c.IDatabase.GetPostById(id)
+	post, err := c.IDatabase.GetPostById(postID)
 	if err != nil {
 		return err
 	}
 
-	//fill comment empty comment field
+	//fill empty comment field
+	comment.UserID = int(token.ID)
 	comment.PostID = int(post.ID)
 	comment.IsFollowed = true
 
@@ -40,24 +42,35 @@ func (c *commentServices) CreateComment(comment models.Comment, id int) error {
 	return nil
 }
 
-func (c *commentServices) SeeAllComments(id int) ([]models.Comment, error) {
+func (c *commentServices) GetAllComments(id int) ([]dto.PublicComment, error) {
 	comments, err := c.IDatabase.GetAllCommentByPost(id)
 	if err != nil {
-		return []models.Comment{}, err
+		return nil, err
 	}
 
-	return comments, nil
+	var result []dto.PublicComment
+	for _, comment := range comments {
+		result = append(result, dto.PublicComment{
+			Model:    comment.Model,
+			UserID:   comment.UserID,
+			PostID:   comment.PostID,
+			Body:     comment.Body,
+			Username: comment.User.Username,
+		})
+	}
+
+	return result, nil
 }
 
-func (c *commentServices) UpdateComment(newComment models.Comment, id int, co int, userId int) error {
+func (c *commentServices) UpdateComment(newComment models.Comment, token dto.Token) error {
 	//get comment
-	comment, err := c.IDatabase.GetCommentById(co)
+	comment, err := c.IDatabase.GetCommentById(int(newComment.ID))
 	if err != nil {
 		return err
 	}
 
 	//check user
-	if comment.UserID != userId {
+	if comment.UserID != int(token.ID) {
 		return errors.New("user not eligible")
 	}
 
@@ -74,19 +87,19 @@ func (c *commentServices) UpdateComment(newComment models.Comment, id int, co in
 	return nil
 }
 
-func (c *commentServices) DeleteComment(userId int, co int) error {
+func (c *commentServices) DeleteComment(commentID int, token dto.Token) error {
 	//get comment
-	comment, err := c.IDatabase.GetCommentById(co)
+	comment, err := c.IDatabase.GetCommentById(commentID)
 	if err != nil {
 		return err
 	}
 
 	//check user
-	if comment.UserID != userId {
+	if comment.UserID != int(token.ID) {
 		return errors.New("user not eligible")
 	}
 
-	err = c.IDatabase.DeleteComment(co)
+	err = c.IDatabase.DeleteComment(commentID)
 	if err != nil {
 		return err
 	}

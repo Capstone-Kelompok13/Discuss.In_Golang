@@ -10,22 +10,22 @@ type IDatabase interface {
 	GetUserByUsername(username string) (models.User, error)
 
 	GetAllTopics() ([]models.Topic, error)
-	GetTopicByName(name string) (models.Topic, error)
-	GetTopicByID(id int) (models.Topic, error)
+	GetTopicByName(topicName string) (models.Topic, error)
+	GetTopicByID(topicID int) (models.Topic, error)
 	SaveNewTopic(models.Topic) error
 	SaveTopic(models.Topic) error
-	RemoveTopic(id int) error
+	RemoveTopic(topicID int) error
 
 	SaveNewPost(post models.Post) error
-	GetAllPostByTopic(id int) ([]models.Post, error)
-	GetPostById(id int) (models.Post, error)
+	GetAllPostByTopic(topidID int) ([]models.Post, error)
+	GetPostById(postID int) (models.Post, error)
 	SavePost(post models.Post) error
-	DeletePost(id int) error
-	GetPostByIdWithAll(id int) (models.Post, error)
+	DeletePost(postID int) error
+	GetPostByIdWithAll(postID int) (models.Post, error)
 
 	SaveNewComment(comment models.Comment) error
-	GetAllCommentByPost(id int) ([]models.Comment, error)
-	GetCommentById(co int) (models.Comment, error)
+	GetAllCommentByPost(postID int) ([]models.Comment, error)
+	GetCommentById(commendID int) (models.Comment, error)
 	SaveComment(comment models.Comment) error
-	DeleteComment(co int) error
+	DeleteComment(commentID int) error
 }

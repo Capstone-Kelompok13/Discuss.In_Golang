@@ -1,10 +1,8 @@
-package models
+package dto
 
-import (
-	"gorm.io/gorm"
-)
+import "gorm.io/gorm"
 
-type Post struct {
+type PublicPost struct {
 	gorm.Model
 	Title     string `json:"title" form:"title"`
 	Photo     string `json:"photo" form:"photo"`
@@ -13,12 +11,4 @@ type Post struct {
 	TopicID   int    `json:"topicId" form:"topicId"`
 	CreatedAt int    `json:"createdAt" form:"createdAt"`
 	IsActive  bool   `json:"isActive" form:"isActive"`
-
-	Comments []Comment
-	User     User  `json:"user"`
-	Topic    Topic `json:"topic"`
-}
-
-func (Post) TableName() string {
-	return "posts"
 }

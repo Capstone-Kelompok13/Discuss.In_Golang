@@ -8,10 +8,10 @@ import (
 	"discusiin/controllers/posts"
 	"discusiin/controllers/topics"
 	"discusiin/controllers/users"
-	"discusiin/dto"
 	mid "discusiin/middleware"
 	"discusiin/routes"
 	"io"
+	"net/http"
 
 	"github.com/labstack/echo-contrib/jaegertracing"
 	"github.com/labstack/echo/v4"
@@ -23,6 +23,13 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 
 	e.Pre(middleware.RemoveTrailingSlash())
 	mid.LogMiddleware(e)
+	cors := middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodPost, http.MethodOptions},
+		AllowHeaders: []string{"Content-Type", "X-CSRF-Token"},
+	})
+	e.Pre(cors)
+
 	trace := jaegertracing.New(e, nil)
 
 	uHandler := users.UserHandler{
@@ -41,52 +48,36 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 		ICommentServices: payload.GetCommentServices(),
 	}
 
-	// corsMiddleware := cors.New(cors.Options{
-	// 	AllowedOrigins: []string{"*"},
-	// 	AllowedMethods: []string{"OPTIONS", "GET", "POST", "PUT"},
-	// 	AllowedHeaders: []string{"Content-Type", "X-CSRF-Token"},
-	// 	Debug:          true,
-	// })
-	// e.Use(echo.WrapMiddleware(corsMiddleware.Handler))
-
 	api := e.Group("/api")
 	v1 := api.Group("/v1")
 
+	//endpoints users
 	users := v1.Group("/users")
-	users.POST("/register", uHandler.Register) // host:port/api/v1/users/register
-	users.POST("/login", uHandler.Login)       // host:port/api/v1/users/login
+	users.POST("/register", uHandler.Register)
+	users.POST("/login", uHandler.Login)
 
-	config := middleware.JWTConfig{
-		Claims:     &dto.Token{},
-		SigningKey: []byte(configs.Cfg.TokenSecret),
-	}
-
+	//endpoints topics
 	topics := v1.Group("/topics")
-	topics.POST("/create", tHandler.CreateNewTopic, middleware.JWTWithConfig(config)) // host:port/api/v1/topics/create
-	topics.PUT("/:id/edit", tHandler.UpdateDescriptionTopic, middleware.JWTWithConfig(config))
-	topics.GET("", tHandler.SeeAllTopics) // host:port/api/v1/topics/
-	// topics.POST("/create", tHandler.CreateNewTopic) // host:port/api/v1/topics/create
-	topics.GET("/:id", tHandler.SeeTopic) // host:port/api/v1/topics/1
-	// topics.PUT("/:id/edit", tHandler.UpdateDescriptionTopic)
-	topics.DELETE("/:id", tHandler.DeleteTopic)
+	topics.POST("/create", tHandler.CreateNewTopic, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	topics.PUT("/edit_description/:topic_id", tHandler.UpdateTopicDescription, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	topics.GET("", tHandler.GetAllTopics)
+	topics.GET("/:topic_id", tHandler.GetTopic)
+	topics.DELETE("/delete/:topic_id", tHandler.DeleteTopic, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
-	// //endpoints comment
-	// topics.GET("/:id/comments", cHandler.SeeAllComment)          // host:port/api/v1/topics/1/comments
-	// topics.POST("/:id/comments/create", cHandler.CreateComment)  // host:port/api/v1/topics/1/comments/create
-	// topics.PUT("/:id/comments/:co/edit", cHandler.UpdateComment) // host:port/api/v1/topics/1/comments/1/edit
-	// topics.DELETE("/:id/comments/:co", cHandler.DeleteComment)   // host:port/api/v1/topics/1/comments/1
-
+	//endpoints posts
 	posts := v1.Group("/posts")
-	posts.POST("/:name/create", pHandler.CreateNewPost)
-	posts.GET("/:name", pHandler.SeeAllPost)
-	posts.GET("/:name/:id", pHandler.SeePost)
-	posts.PUT("/:name/:id/edit", pHandler.EditPost)
-	posts.DELETE("/:name/:id", pHandler.DeletePost)
+	posts.POST("/create/:topic_name", pHandler.CreateNewPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	posts.GET("/all/:topic_name", pHandler.GetAllPost)
+	posts.GET("/:post_id", pHandler.GetPost)
+	posts.PUT("/edit/:post_id", pHandler.EditPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	posts.DELETE("/delete/:post_id", pHandler.DeletePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
-	//endpoints comment
-	posts.GET("/:name/:id/comments", cHandler.SeeAllComment)          // host:port/api/v1/topics/1/comments
-	posts.POST("/:name/:id/comments/create", cHandler.CreateComment)  // host:port/api/v1/topics/1/comments/create
-	posts.PUT("/:name/:id/comments/:co/edit", cHandler.UpdateComment) // host:port/api/v1/topics/1/comments/1/edit
-	posts.DELETE("/:name/:id/comments/:co", cHandler.DeleteComment)   // host:port/api/v1/topics/1/comments/1
+	//endpoints comments
+	comments := posts.Group("/comments")
+	comments.GET("/:post_id", cHandler.GetAllComment)
+	comments.POST("/create/:post_id", cHandler.CreateComment, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	comments.PUT("/edit/:comment_id", cHandler.UpdateComment, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	comments.DELETE("/delete/:comment_id", cHandler.DeleteComment, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+
 	return e, trace
 }

@@ -1,6 +1,7 @@
 package comments
 
 import (
+	"discusiin/helper"
 	"discusiin/models"
 	comments "discusiin/services/comments"
 	"net/http"
@@ -15,14 +16,29 @@ type CommentHandler struct {
 
 func (h *CommentHandler) CreateComment(c echo.Context) error {
 	var comment models.Comment
-	c.Bind(&comment)
+	errBind := c.Bind(&comment)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errBind.Error(),
+		})
+	}
 
 	//get logged userId
-	// code here
-	comment.UserID = 1 //untuk percobaan
+	token, errDecodeJWT := helper.DecodeJWT(c)
+	if errDecodeJWT != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errDecodeJWT.Error(),
+		})
+	}
 
-	id, _ := strconv.Atoi(c.Param("id"))
-	err := h.ICommentServices.CreateComment(comment, id)
+	postID, errAtoi := strconv.Atoi(c.Param("post_id"))
+	if errAtoi != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errAtoi.Error(),
+		})
+	}
+
+	err := h.ICommentServices.CreateComment(comment, postID, token)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -35,14 +51,17 @@ func (h *CommentHandler) CreateComment(c echo.Context) error {
 
 }
 
-func (h *CommentHandler) SeeAllComment(c echo.Context) error {
-	var comments []models.Comment
+func (h *CommentHandler) GetAllComment(c echo.Context) error {
 
 	//get topic id
-	id, _ := strconv.Atoi(c.Param("id"))
-
+	postID, errAtoi := strconv.Atoi(c.Param("post_id"))
+	if errAtoi != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errAtoi.Error(),
+		})
+	}
 	//get all coment from post
-	comments, err := h.ICommentServices.SeeAllComments(id)
+	comments, err := h.ICommentServices.GetAllComments(postID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -57,16 +76,32 @@ func (h *CommentHandler) SeeAllComment(c echo.Context) error {
 
 func (h *CommentHandler) UpdateComment(c echo.Context) error {
 	var comment models.Comment
-	c.Bind(&comment)
+	errBind := c.Bind(&comment)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errBind.Error(),
+		})
+	}
 
 	//get logged userId
-	// code here
-	userId := 1 //untuk percobaan
+	token, errDecodeJWT := helper.DecodeJWT(c)
+	if errDecodeJWT != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errDecodeJWT.Error(),
+		})
+	}
 
-	//check if user who eligible
-	co, _ := strconv.Atoi(c.Param("co")) //untuk param comment
-	id, _ := strconv.Atoi(c.Param("id"))
-	err := h.ICommentServices.UpdateComment(comment, id, co, userId)
+	//check if user who eligibleuntuk param comment
+	commentID, errAtoi := strconv.Atoi(c.Param("comment_id"))
+	if errAtoi != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errAtoi.Error(),
+		})
+	}
+
+	comment.ID = uint(commentID)
+
+	err := h.ICommentServices.UpdateComment(comment, token)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -81,12 +116,21 @@ func (h *CommentHandler) UpdateComment(c echo.Context) error {
 
 func (h *CommentHandler) DeleteComment(c echo.Context) error {
 	//get logged userId
-	// code here
-	userId := 1 //untuk percobaan
+	token, errDecodeJWT := helper.DecodeJWT(c)
+	if errDecodeJWT != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errDecodeJWT.Error(),
+		})
+	}
 
 	//check if user who eligible
-	co, _ := strconv.Atoi(c.Param("co")) //untuk param comment
-	err := h.ICommentServices.DeleteComment(userId, co)
+	commentID, errAtoi := strconv.Atoi(c.Param("comment_id"))
+	if errAtoi != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errAtoi.Error(),
+		})
+	}
+	err := h.ICommentServices.DeleteComment(commentID, token)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),

@@ -10,11 +10,6 @@ type GormSql struct {
 	DB *gorm.DB
 }
 
-// // SaveTopic implements IDatabase
-// func (*GormSql) SaveTopic(models.Topic) error {
-// 	panic("unimplemented")
-// }
-
 func NewGorm(db *gorm.DB) IDatabase {
 	return &GormSql{
 		DB: db,
@@ -52,7 +47,7 @@ func (db GormSql) Login(email, password string) (models.User, error) {
 	return user, nil
 }
 
-//Topic -------------------------------------------------------------------------------------------------------------------------------------------------
+// Topic -------------------------------------------------------------------------------------------------------------------------------------------------
 func (db GormSql) GetAllTopics() ([]models.Topic, error) {
 	var topics []models.Topic
 
@@ -75,7 +70,6 @@ func (db GormSql) GetTopicByName(name string) (models.Topic, error) {
 
 	if err != nil {
 		return models.Topic{}, err
-		// return models.Topic{}, errors.New("")
 	}
 
 	return topic, nil
@@ -101,7 +95,7 @@ func (db GormSql) SaveNewTopic(topic models.Topic) error {
 }
 
 func (db GormSql) SaveTopic(topic models.Topic) error {
-	err := db.DB.Where("id = ?", topic.ID).Save(topic)
+	err := db.DB.Where("id = ?", topic.ID).Save(&topic)
 	if err != nil {
 		return err.Error
 	}
@@ -117,7 +111,7 @@ func (db GormSql) RemoveTopic(id int) error {
 	return nil
 }
 
-//Post -------------------------------------------------------------------------------------------------------------------------------------------------
+// Post -------------------------------------------------------------------------------------------------------------------------------------------------
 func (db GormSql) SaveNewPost(post models.Post) error {
 	err := db.DB.Create(&post).Error
 	if err != nil {
@@ -179,7 +173,7 @@ func (db GormSql) GetPostByIdWithAll(id int) (models.Post, error) {
 	return post, nil
 }
 
-//Comment -------------------------------------------------------------------------------------------------------------------------------------------------
+// Comment -------------------------------------------------------------------------------------------------------------------------------------------------
 func (db GormSql) SaveNewComment(comment models.Comment) error {
 	err := db.DB.Create(&comment).Error
 	if err != nil {

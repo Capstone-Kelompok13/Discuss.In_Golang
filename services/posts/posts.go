@@ -1,6 +1,7 @@
 package posts
 
 import (
+	"discusiin/dto"
 	"discusiin/models"
 	"discusiin/repositories"
 	"errors"
@@ -14,11 +15,11 @@ func NewPostServices(db repositories.IDatabase) IPostServices {
 type IPostServices interface {
 	GetTopic(name string) (int, error)
 
-	CreatePost(post models.Post, name string) error
-	SeePosts(name string) ([]models.Post, error)
-	SeePost(id int) (models.Post, error)
-	UpdatePost(newPost models.Post, id int, userId int) error
-	DeletePost(id int, userId int) error
+	CreatePost(post models.Post, name string, token dto.Token) error
+	GetPosts(name string) ([]dto.PublicPost, error)
+	GetPost(id int) (dto.PublicPost, error)
+	UpdatePost(newPost models.Post, id int, token dto.Token) error
+	DeletePost(id int, token dto.Token) error
 }
 
 type postServices struct {
@@ -34,19 +35,21 @@ func (p *postServices) GetTopic(name string) (int, error) {
 	return int(topic.ID), nil
 }
 
-func (p *postServices) CreatePost(post models.Post, name string) error {
+func (p *postServices) CreatePost(post models.Post, name string, token dto.Token) error {
 	//find topic
 	topic, err := p.IDatabase.GetTopicByName(name)
 	if err != nil {
 		return err
 	}
 
+	//owner
+	post.UserID = int(token.ID)
 	//insert topic id and is active
 	post.TopicID = int(topic.ID)
-	post.IsActive = true
-
 	//epoch time
 	post.CreatedAt = int(time.Now().UnixMilli())
+	// isActiveDefault
+	post.IsActive = true
 
 	//save post
 	err = p.IDatabase.SaveNewPost(post)
@@ -57,38 +60,61 @@ func (p *postServices) CreatePost(post models.Post, name string) error {
 	return nil
 }
 
-func (p *postServices) SeePosts(name string) ([]models.Post, error) {
+func (p *postServices) GetPosts(name string) ([]dto.PublicPost, error) {
 	//find topic
 	topic, err := p.IDatabase.GetTopicByName(name)
 	if err != nil {
-		return []models.Post{}, err
+		return nil, err
 	}
 
 	posts, err := p.IDatabase.GetAllPostByTopic(int(topic.ID))
+	var result []dto.PublicPost
+	for _, v := range posts {
+		result = append(result, dto.PublicPost{
+			Model:     v.Model,
+			Title:     v.Title,
+			Photo:     v.Photo,
+			Body:      v.Body,
+			UserID:    v.UserID,
+			TopicID:   v.TopicID,
+			CreatedAt: v.CreatedAt,
+			IsActive:  v.IsActive,
+		})
+	}
 	if err != nil {
-		return []models.Post{}, err
+		return nil, err
 	}
 
-	return posts, nil
+	return result, nil
 }
 
-func (p *postServices) SeePost(id int) (models.Post, error) {
+func (p *postServices) GetPost(id int) (dto.PublicPost, error) {
 	post, err := p.IDatabase.GetPostById(id)
 	if err != nil {
-		return models.Post{}, err
+		return dto.PublicPost{}, err
+	}
+	result := dto.PublicPost{
+		Model:     post.Model,
+		Title:     post.Title,
+		Photo:     post.Photo,
+		Body:      post.Body,
+		UserID:    post.UserID,
+		TopicID:   post.TopicID,
+		CreatedAt: post.CreatedAt,
+		IsActive:  post.IsActive,
 	}
 
-	return post, nil
+	return result, nil
 }
 
-func (p *postServices) UpdatePost(newPost models.Post, id int, userId int) error {
+func (p *postServices) UpdatePost(newPost models.Post, postID int, token dto.Token) error {
 	//get previous post
-	post, err := p.IDatabase.GetPostById(id)
+	post, err := p.IDatabase.GetPostById(postID)
 	if err != nil {
 		return err
 	}
 
-	if userId != post.UserID {
+	if int(token.ID) != post.UserID {
 		return errors.New("user not eligible")
 	}
 
@@ -104,7 +130,7 @@ func (p *postServices) UpdatePost(newPost models.Post, id int, userId int) error
 	return nil
 }
 
-func (p *postServices) DeletePost(id int, userId int) error {
+func (p *postServices) DeletePost(id int, token dto.Token) error {
 	//find post
 	post, err := p.IDatabase.GetPostById(id)
 	if err != nil {
@@ -112,8 +138,15 @@ func (p *postServices) DeletePost(id int, userId int) error {
 	}
 
 	//check user
-	if userId != post.UserID {
-		return errors.New("user not eligible")
+	user, err := p.IDatabase.GetUserByUsername(token.Username)
+	if err != nil {
+		return err
+	}
+
+	if !user.IsAdmin {
+		if int(token.ID) != post.UserID {
+			return errors.New("user not eligible")
+		}
 	}
 
 	err = p.IDatabase.DeletePost(id)

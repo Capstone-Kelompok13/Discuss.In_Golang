@@ -1,6 +1,7 @@
 package posts
 
 import (
+	"discusiin/helper"
 	"discusiin/models"
 	"discusiin/services/posts"
 	"net/http"
@@ -15,15 +16,21 @@ type PostHandler struct {
 
 func (h *PostHandler) CreateNewPost(c echo.Context) error {
 	var p models.Post
-	c.Bind(&p)
+	errBind := c.Bind(&p)
+	if errBind != nil {
+		return errBind
+	}
 
-	name := c.Param("name")
+	url_param_value := c.Param("topic_name")
+	topicName := helper.URLMinusToSpace(url_param_value)
 
 	//get logged userId
-	// code here
-	p.UserID = 1 //untuk percobaan
+	token, errDecodeJWT := helper.DecodeJWT(c)
+	if errDecodeJWT != nil {
+		return errDecodeJWT
+	}
 
-	err := h.IPostServices.CreatePost(p, name)
+	err := h.IPostServices.CreatePost(p, topicName, token)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -35,11 +42,11 @@ func (h *PostHandler) CreateNewPost(c echo.Context) error {
 	})
 }
 
-func (h *PostHandler) SeeAllPost(c echo.Context) error {
-	var posts []models.Post
-	name := c.Param("name")
+func (h *PostHandler) GetAllPost(c echo.Context) error {
+	url_param_value := c.Param("topic_name")
+	topicName := helper.URLMinusToSpace(url_param_value)
 
-	posts, err := h.IPostServices.SeePosts(name)
+	posts, err := h.IPostServices.GetPosts(topicName)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -52,12 +59,16 @@ func (h *PostHandler) SeeAllPost(c echo.Context) error {
 	})
 }
 
-func (h *PostHandler) SeePost(c echo.Context) error {
-	var p models.Post
+func (h *PostHandler) GetPost(c echo.Context) error {
 
-	id, _ := strconv.Atoi(c.Param("id"))
+	id, errAtoi := strconv.Atoi(c.Param("post_id"))
+	if errAtoi != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errAtoi.Error(),
+		})
+	}
 
-	p, err := h.IPostServices.SeePost(id)
+	p, err := h.IPostServices.GetPost(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -72,13 +83,29 @@ func (h *PostHandler) SeePost(c echo.Context) error {
 
 func (h *PostHandler) EditPost(c echo.Context) error {
 	var newPost models.Post
-	c.Bind(&newPost)
+	errBind := c.Bind(&newPost)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errBind.Error(),
+		})
+	}
 
 	//get user id from logged user
-	userId := 1 //sebagai percobaan
+	token, errDecodeJWT := helper.DecodeJWT(c)
+	if errDecodeJWT != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errDecodeJWT.Error(),
+		})
+	}
 
-	id, _ := strconv.Atoi(c.Param("id"))
-	err := h.IPostServices.UpdatePost(newPost, id, userId)
+	id, errAtoi := strconv.Atoi(c.Param("post_id"))
+	if errAtoi != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errAtoi.Error(),
+		})
+	}
+
+	err := h.IPostServices.UpdatePost(newPost, id, token)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
@@ -95,10 +122,20 @@ func (h *PostHandler) DeletePost(c echo.Context) error {
 	c.Bind(&newPost)
 
 	//get user id from logged user
-	userId := 1 //sebagai percobaan
+	token, errDecodeJWT := helper.DecodeJWT(c)
+	if errDecodeJWT != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errDecodeJWT.Error(),
+		})
+	}
 
-	id, _ := strconv.Atoi(c.Param("id"))
-	err := h.IPostServices.DeletePost(id, userId)
+	postID, errAtoi := strconv.Atoi(c.Param("post_id"))
+	if errAtoi != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": errAtoi.Error(),
+		})
+	}
+	err := h.IPostServices.DeletePost(postID, token)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": err.Error(),
