@@ -5,6 +5,7 @@ import (
 	"discusiin/models"
 	"discusiin/services/users"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -80,6 +81,28 @@ func (h *UserHandler) Login(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success",
+		"data":    result,
+	})
+}
+
+func (h *UserHandler) GetUsers(c echo.Context) error {
+	token, errDecodeJWT := helper.DecodeJWT(c)
+	if errDecodeJWT != nil {
+		return errDecodeJWT
+	}
+
+	page, errAtoi := strconv.Atoi(c.QueryParam("page"))
+	if errAtoi != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
+	}
+
+	result, err := h.IUserServices.GetUsers(token, page)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
 		"message": "success",
 		"data":    result,
 	})

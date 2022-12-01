@@ -65,6 +65,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	users := v1.Group("/users")
 	users.POST("/register", uHandler.Register)
 	users.POST("/login", uHandler.Login)
+	users.GET("", uHandler.GetUsers)
 
 	//endpoints topics
 	topics := v1.Group("/topics")

@@ -8,6 +8,7 @@ type IDatabase interface {
 	SaveNewUser(models.User) error
 	GetUserByUsername(username string) (models.User, error)
 	GetUserByEmail(email string) (models.User, error)
+	GetUsers(page int) ([]models.User, error)
 
 	GetAllTopics() ([]models.Topic, error)
 	GetTopicByName(topicName string) (models.Topic, error)

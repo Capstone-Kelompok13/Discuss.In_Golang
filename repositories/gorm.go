@@ -44,6 +44,14 @@ func (db GormSql) GetUserByEmail(email string) (models.User, error) {
 	}
 	return user, nil
 }
+func (db GormSql) GetUsers(page int) ([]models.User, error) {
+	var users []models.User
+	err := db.DB.Order("username ASC").Offset((page - 1) * 20).Limit(20).Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
 
 // Topic -------------------------------------------------------------------------------------------------------------------------------------------------
 func (db GormSql) GetAllTopics() ([]models.Topic, error) {

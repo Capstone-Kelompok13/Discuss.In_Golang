@@ -18,7 +18,8 @@ func NewUserServices(db repositories.IDatabase) IUserServices {
 
 type IUserServices interface {
 	Register(user models.User) error
-	Login(user models.User) (dto.Login, error)
+	Login(user models.User) (dto.PublicUser, error)
+	GetUsers(token dto.Token, page int) ([]dto.PublicUser, error)
 }
 
 type userServices struct {
@@ -70,25 +71,25 @@ func (s *userServices) Register(user models.User) error {
 	}
 	return nil
 }
-func (s *userServices) Login(user models.User) (dto.Login, error) {
+func (s *userServices) Login(user models.User) (dto.PublicUser, error) {
 
 	data, err := s.IDatabase.GetUserByEmail(user.Email)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return dto.Login{}, echo.NewHTTPError(http.StatusNotFound, "no account using this email")
+			return dto.PublicUser{}, echo.NewHTTPError(http.StatusNotFound, "no account using this email")
 		}
-		return dto.Login{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return dto.PublicUser{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	var result dto.Login
+	var result dto.PublicUser
 	valid := helper.CheckPasswordHash(user.Password, data.Password)
 	if valid {
-		token, err := middleware.GetToken(user.ID, user.Username)
+		token, err := middleware.GetToken(data.ID, data.Username)
 		if err != nil {
-			return dto.Login{}, echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+			return dto.PublicUser{}, echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 		}
 
-		result = dto.Login{
+		result = dto.PublicUser{
 			ID:       data.ID,
 			Username: data.Username,
 			Email:    data.Email,
@@ -98,7 +99,38 @@ func (s *userServices) Login(user models.User) (dto.Login, error) {
 			Token:    token,
 		}
 	} else {
-		return dto.Login{}, echo.NewHTTPError(http.StatusForbidden, "password incorrect")
+		return dto.PublicUser{}, echo.NewHTTPError(http.StatusForbidden, "password incorrect")
+	}
+	return result, nil
+}
+func (s *userServices) GetUsers(token dto.Token, page int) ([]dto.PublicUser, error) {
+	u, errGetUserByUsername := s.IDatabase.GetUserByUsername(token.Username)
+	if errGetUserByUsername != nil {
+		if errGetUserByUsername.Error() == "record not found" {
+			return nil, echo.NewHTTPError(http.StatusNotFound, errGetUserByUsername.Error())
+		} else {
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, errGetUserByUsername.Error())
+		}
+	}
+
+	if !u.IsAdmin {
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, "admin access only")
+	}
+	users, err := s.IDatabase.GetUsers(page)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	var result []dto.PublicUser
+	for _, user := range users {
+		result = append(result, dto.PublicUser{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+			Photo:    user.Photo,
+			BanUntil: user.BanUntil,
+			IsAdmin:  user.IsAdmin,
+		})
 	}
 	return result, nil
 }
