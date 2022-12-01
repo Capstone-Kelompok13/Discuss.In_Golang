@@ -15,11 +15,10 @@ import (
 )
 
 type Payload struct {
-	Config  *configs.Config
-	DBGorm  *gorm.DB
-	DBSql   *sql.DB
-	repoSql repositories.IDatabase
-	// repoTSql repositories.ITopicDatabase
+	Config   *configs.Config
+	DBGorm   *gorm.DB
+	DBSql    *sql.DB
+	repoSql  repositories.IDatabase
 	uService uService.IUserServices
 	tService tService.ITopicServices
 	pService pService.IPostServices

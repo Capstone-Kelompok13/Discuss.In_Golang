@@ -19,36 +19,28 @@ func (h *LikeHandler) LikePost(c echo.Context) error {
 
 	errBind := c.Bind(&like)
 	if errBind != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errBind.Error(),
-		})
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
 	}
 
 	//get logged userid
 	token, errDecodeJWT := helper.DecodeJWT(c)
 	if errDecodeJWT != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errDecodeJWT.Error(),
-		})
+		return errDecodeJWT
 	}
 
 	//get post id
 	postId, errAtoi := strconv.Atoi(c.Param("post_id"))
 	if errAtoi != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errAtoi.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
 
 	err := h.ILikeServices.LikePost(token, postId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": err.Error(),
-		})
+		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "Like Success",
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "like success",
 	})
 }
 
@@ -57,35 +49,27 @@ func (h *LikeHandler) DislikePost(c echo.Context) error {
 
 	errBind := c.Bind(&like)
 	if errBind != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errBind.Error(),
-		})
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
 	}
 
 	//get logged userid
 	token, errDecodeJWT := helper.DecodeJWT(c)
 	if errDecodeJWT != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errDecodeJWT.Error(),
-		})
+		return errDecodeJWT
 	}
 
 	//get post id
 	postId, errAtoi := strconv.Atoi(c.Param("post_id"))
 	if errAtoi != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errAtoi.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
 
 	err := h.ILikeServices.DislikePost(token, postId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": err.Error(),
-		})
+		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "Like Success",
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "dislike Success",
 	})
 }

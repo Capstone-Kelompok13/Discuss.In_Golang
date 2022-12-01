@@ -4,6 +4,9 @@ import (
 	"discusiin/dto"
 	"discusiin/models"
 	"discusiin/repositories"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 func NewLikeServices(db repositories.IDatabase) ILikeServices {
@@ -20,25 +23,25 @@ type likeServices struct {
 }
 
 func (l *likeServices) LikePost(token dto.Token, postId int) error {
-	// //get post
-	// post, err := l.IDatabase.GetPostById(postId)
-	// if err != nil {
-	// 	return err
-	// }
+
 	var like models.Like
 
 	//cek jika like ada
 	oldLike, err := l.IDatabase.GetLikeByUserAndPostId(int(token.ID), postId)
 	if err != nil {
-		//jika tidak ada
-		like.UserID = int(token.ID)
-		like.PostID = postId
-		like.IsLike = true
+		if err.Error() == "record not found" {
+			//jika tidak ada
+			like.UserID = int(token.ID)
+			like.PostID = postId
+			like.IsLike = true
 
-		//simpan data like baru
-		errSaveLike := l.IDatabase.SaveNewLike(like)
-		if errSaveLike != nil {
-			return err
+			//simpan data like baru
+			errSaveLike := l.IDatabase.SaveNewLike(like)
+			if errSaveLike != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, errSaveLike.Error())
+			}
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	} else {
 		//jika ada
@@ -48,7 +51,7 @@ func (l *likeServices) LikePost(token dto.Token, postId int) error {
 
 			errLike := l.IDatabase.SaveLike(oldLike)
 			if errLike != nil {
-				return err
+				return echo.NewHTTPError(http.StatusInternalServerError, errLike.Error())
 			}
 		} else if oldLike.IsDislike { //jika di dislike
 			//simpan data baru
@@ -57,14 +60,14 @@ func (l *likeServices) LikePost(token dto.Token, postId int) error {
 
 			errLike := l.IDatabase.SaveLike(oldLike)
 			if errLike != nil {
-				return err
+				return echo.NewHTTPError(http.StatusInternalServerError, errLike.Error())
 			}
 		} else { //jika like netral
 			oldLike.IsLike = true
 
 			errLike := l.IDatabase.SaveLike(oldLike)
 			if errLike != nil {
-				return errLike
+				return echo.NewHTTPError(http.StatusInternalServerError, errLike.Error())
 			}
 		}
 	}
@@ -73,11 +76,7 @@ func (l *likeServices) LikePost(token dto.Token, postId int) error {
 }
 
 func (l *likeServices) DislikePost(token dto.Token, postId int) error {
-	// //get post
-	// post, err := l.IDatabase.GetPostById(postId)
-	// if err != nil {
-	// 	return err
-	// }
+
 	var like models.Like
 
 	//cek jika like ada
@@ -91,7 +90,7 @@ func (l *likeServices) DislikePost(token dto.Token, postId int) error {
 		//simpan data like baru
 		errSaveLike := l.IDatabase.SaveNewLike(like)
 		if errSaveLike != nil {
-			return err
+			return echo.NewHTTPError(http.StatusInternalServerError, errSaveLike.Error())
 		}
 	} else {
 		//jika ada
@@ -101,7 +100,7 @@ func (l *likeServices) DislikePost(token dto.Token, postId int) error {
 
 			errLike := l.IDatabase.SaveLike(oldLike)
 			if errLike != nil {
-				return err
+				return echo.NewHTTPError(http.StatusInternalServerError, errLike.Error())
 			}
 		} else if oldLike.IsLike { //jika di like
 			//simpan data baru
@@ -110,14 +109,14 @@ func (l *likeServices) DislikePost(token dto.Token, postId int) error {
 
 			errLike := l.IDatabase.SaveLike(oldLike)
 			if errLike != nil {
-				return err
+				return echo.NewHTTPError(http.StatusInternalServerError, errLike.Error())
 			}
 		} else { //jika like netral
 			oldLike.IsDislike = true
 
 			errLike := l.IDatabase.SaveLike(oldLike)
 			if errLike != nil {
-				return errLike
+				return echo.NewHTTPError(http.StatusInternalServerError, errLike.Error())
 			}
 		}
 	}

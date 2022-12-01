@@ -95,7 +95,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	comments.DELETE("/delete/:comment_id", cHandler.DeleteComment, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
 	//endpoints reply
-	replys := comments.Group("/replys")
+	replys := comments.Group("/replies")
 	replys.GET("/:comment_id", rHandler.GetAllReply)
 	replys.POST("/create/:comment_id", rHandler.CreateReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	replys.PUT("/edit/:reply_id", rHandler.UpdateReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
