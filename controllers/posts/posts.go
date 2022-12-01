@@ -47,7 +47,10 @@ func (h *PostHandler) GetAllPost(c echo.Context) error {
 	topicName := helper.URLDecodeReformat(url_param_value)
 
 	//check if page exist
-	page, _ := strconv.Atoi(c.QueryParam("page"))
+	page, errAtoi := strconv.Atoi(c.QueryParam("page"))
+	if errAtoi != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
+	}
 
 	posts, err := h.IPostServices.GetPosts(topicName, page)
 	if err != nil {
