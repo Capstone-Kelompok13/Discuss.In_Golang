@@ -168,6 +168,28 @@ func (db GormSql) DeletePost(id int) error {
 	return nil
 }
 
+func (db GormSql) CountPostPage() (int, error) {
+	var pageNumber int64
+
+	err := db.DB.Model(&models.Post{}).Count(&pageNumber).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return int(pageNumber), nil
+}
+
+func (db GormSql) CountPostByTopicPage(topicId int) (int, error) {
+	var pageNumber int64
+
+	err := db.DB.Model(&models.Post{}).Where("topic_id = ?", topicId).Count(&pageNumber).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return int(pageNumber), nil
+}
+
 func (db GormSql) GetPostByIdWithAll(id int) (models.Post, error) {
 	var post models.Post
 	err := db.DB.Model(&models.Post{}).Where("id = ?", id).Preload("Comments").Find(&post).Error

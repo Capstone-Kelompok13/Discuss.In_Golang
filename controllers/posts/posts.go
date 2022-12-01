@@ -49,14 +49,15 @@ func (h *PostHandler) GetAllPost(c echo.Context) error {
 	//check if page exist
 	page, _ := strconv.Atoi(c.QueryParam("page"))
 
-	posts, err := h.IPostServices.GetPosts(topicName, page)
+	posts, pageNumber, err := h.IPostServices.GetPosts(topicName, page)
 	if err != nil {
 		return err
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message":   "success",
-		"data_post": posts,
+		"message":     "success",
+		"data_post":   posts,
+		"page_number": pageNumber,
 	})
 }
 
@@ -134,12 +135,13 @@ func (h *PostHandler) GetRecentPost(c echo.Context) error {
 	//check if page exist
 	page, _ := strconv.Atoi(c.QueryParam("page"))
 
-	posts, err := h.IPostServices.GetRecentPost(page)
+	posts, pageNumber, err := h.IPostServices.GetRecentPost(page)
 	if err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"message":   "success",
-		"data_post": posts,
+		"message":     "success",
+		"data_post":   posts,
+		"page_number": pageNumber,
 	})
 }
