@@ -40,6 +40,7 @@ func InitDatabase() {
 		&models.Post{},
 		&models.Comment{},
 		&models.Reply{},
+		&models.Like{},
 	)
 
 	if err != nil {

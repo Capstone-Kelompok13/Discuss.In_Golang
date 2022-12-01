@@ -5,6 +5,7 @@ import (
 
 	"discusiin/configs"
 	"discusiin/controllers/comments"
+	"discusiin/controllers/likes"
 	"discusiin/controllers/posts"
 	"discusiin/controllers/replies"
 	"discusiin/controllers/topics"
@@ -53,6 +54,10 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 		IReplyServices: payload.GetReplyServices(),
 	}
 
+	lHandler := likes.LikeHandler{
+		ILikeServices: payload.GetLikeServices(),
+	}
+
 	api := e.Group("/api")
 	v1 := api.Group("/v1")
 
@@ -77,6 +82,10 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	posts.GET("/:post_id", pHandler.GetPost)
 	posts.PUT("/edit/:post_id", pHandler.EditPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	posts.DELETE("/delete/:post_id", pHandler.DeletePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+
+	//endpoint Like
+	posts.PUT("/likes/:post_id", lHandler.LikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	posts.PUT("/dislikes/:post_id", lHandler.DislikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
 	//endpoints comments
 	comments := posts.Group("/comments")

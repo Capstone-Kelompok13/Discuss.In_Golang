@@ -35,4 +35,8 @@ type IDatabase interface {
 	GetReplyById(re int) (models.Reply, error)
 	SaveReply(reply models.Reply) error
 	DeleteReply(re int) error
+
+	GetLikeByUserAndPostId(userId int, postId int) (models.Like, error)
+	SaveNewLike(like models.Like) error
+	SaveLike(like models.Like) error
 }
