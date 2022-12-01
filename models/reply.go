@@ -15,5 +15,5 @@ type Reply struct {
 }
 
 func (Reply) TableName() string {
-	return "Replies"
+	return "replies"
 }

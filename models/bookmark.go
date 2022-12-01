@@ -14,5 +14,5 @@ type Bookmark struct {
 }
 
 func (Bookmark) TableName() string {
-	return "Bookmarks"
+	return "bookmarks"
 }

@@ -14,5 +14,5 @@ type FollowedTopic struct {
 }
 
 func (FollowedTopic) TableName() string {
-	return "FollowedTopics"
+	return "followedTopics"
 }

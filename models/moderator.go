@@ -14,5 +14,5 @@ type Moderator struct {
 }
 
 func (Moderator) TableName() string {
-	return "Moderators"
+	return "moderators"
 }

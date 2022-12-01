@@ -11,5 +11,5 @@ type Topic struct {
 }
 
 func (Topic) TableName() string {
-	return "Topics"
+	return "topics"
 }
