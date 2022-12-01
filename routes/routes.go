@@ -5,6 +5,7 @@ import (
 	"discusiin/configs"
 	"discusiin/repositories"
 	cService "discusiin/services/comments"
+	lService "discusiin/services/likes"
 	pService "discusiin/services/posts"
 	rService "discusiin/services/replies"
 	tService "discusiin/services/topics"
@@ -24,6 +25,7 @@ type Payload struct {
 	pService pService.IPostServices
 	cService cService.ICommentServices
 	rService rService.IReplyServices
+	lService lService.ILikeServices
 }
 
 func (p *Payload) InitUserService() {
@@ -118,4 +120,21 @@ func (p *Payload) InitReplyService() {
 	}
 
 	p.rService = rService.NewReplyServices(p.repoSql)
+}
+
+// Like -----------------------------------------------------------------------------------------------------------------
+func (p *Payload) GetLikeServices() lService.ILikeServices {
+	if p.lService == nil {
+		p.InitLikeService()
+	}
+
+	return p.lService
+}
+
+func (p *Payload) InitLikeService() {
+	if p.repoSql == nil {
+		p.InitRepoMysql()
+	}
+
+	p.lService = lService.NewLikeServices(p.repoSql)
 }

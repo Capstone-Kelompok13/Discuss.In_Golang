@@ -275,3 +275,33 @@ func (db GormSql) DeleteReply(re int) error {
 
 	return nil
 }
+
+// Like -------------------------------------------------------------------------------------------------------------------------------------------------
+func (db GormSql) GetLikeByUserAndPostId(userId int, postId int) (models.Like, error) {
+	var like models.Like
+
+	err := db.DB.Where("user_id = ?", userId).Where("post_id = ?", postId).First(&like).Error
+	if err != nil {
+		return models.Like{}, err
+	}
+
+	return like, nil
+}
+
+func (db GormSql) SaveNewLike(like models.Like) error {
+	err := db.DB.Create(&like).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db GormSql) SaveLike(like models.Like) error {
+	err := db.DB.Save(&like).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
