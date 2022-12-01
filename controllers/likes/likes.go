@@ -2,7 +2,6 @@ package likes
 
 import (
 	"discusiin/helper"
-	"discusiin/models"
 	"discusiin/services/likes"
 	"net/http"
 	"strconv"
@@ -15,12 +14,6 @@ type LikeHandler struct {
 }
 
 func (h *LikeHandler) LikePost(c echo.Context) error {
-	var like models.Like
-
-	errBind := c.Bind(&like)
-	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
-	}
 
 	//get logged userid
 	token, errDecodeJWT := helper.DecodeJWT(c)
@@ -39,18 +32,11 @@ func (h *LikeHandler) LikePost(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "like success",
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "success",
 	})
 }
-
 func (h *LikeHandler) DislikePost(c echo.Context) error {
-	var like models.Like
-
-	errBind := c.Bind(&like)
-	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
-	}
 
 	//get logged userid
 	token, errDecodeJWT := helper.DecodeJWT(c)
@@ -69,7 +55,7 @@ func (h *LikeHandler) DislikePost(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "dislike Success",
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "success",
 	})
 }

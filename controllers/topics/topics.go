@@ -55,8 +55,8 @@ func (h *TopicHandler) GetAllTopics(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":    "success",
-		"data_topic": topics,
+		"message": "success",
+		"data":    topics,
 	})
 }
 
@@ -73,8 +73,8 @@ func (h *TopicHandler) GetTopic(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":    "success",
-		"data_topic": topic,
+		"message": "success",
+		"data":    topic,
 	})
 }
 

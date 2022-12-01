@@ -4,6 +4,7 @@ import (
 	"discusiin/dto"
 	"discusiin/models"
 	"discusiin/repositories"
+	"log"
 	"net/http"
 	"time"
 
@@ -70,30 +71,52 @@ func (p *postServices) GetPosts(name string, page int) ([]dto.PublicPost, int, e
 	}
 
 	var result []dto.PublicPost
-	for _, v := range posts {
+	for _, post := range posts {
+		likeCount, _ := p.IDatabase.CountPostLike(int(post.ID))
+		log.Println("jumlah like: ", likeCount)
+		commentCount, _ := p.IDatabase.CountPostComment(int(post.ID))
+		log.Println("jumlah comment: ", commentCount)
+		dislikeCount, _ := p.IDatabase.CountPostDislike(int(post.ID))
+		log.Println("jumlah dislike: ", dislikeCount)
+
 		result = append(result, dto.PublicPost{
-			Model:     v.Model,
-			Title:     v.Title,
-			Photo:     v.Photo,
-			Body:      v.Body,
-			UserID:    v.UserID,
-			Username:  v.User.Username,
-			TopicID:   v.TopicID,
-			Topicname: v.Topic.Name,
-			CreatedAt: v.CreatedAt,
-			IsActive:  v.IsActive,
+			Model:     post.Model,
+			Title:     post.Title,
+			Photo:     post.Photo,
+			Body:      post.Body,
+			CreatedAt: post.CreatedAt,
+			IsActive:  post.IsActive,
+			User: dto.PostUser{
+				UserID:   post.UserID,
+				Photo:    post.User.Photo,
+				Username: post.User.Username,
+			},
+			Topic: dto.PostTopic{
+				TopicID:   post.TopicID,
+				TopicName: post.Topic.Name,
+			},
+			Count: dto.PostCount{
+				LikeCount:    likeCount,
+				CommentCount: commentCount,
+				DislikeCount: dislikeCount,
+			},
 		})
 	}
 
 	//count page number
-	pageNumber, errPage := p.IDatabase.CountPostByTopicPage(int(topic.ID))
+	numberOfPost, errPage := p.IDatabase.CountPostByTopicID(int(topic.ID))
 	if errPage != nil {
 		return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	pageNumber = (pageNumber / 20) + 1
+	var numberOfPage int
+	if numberOfPost%20 == 0 {
+		numberOfPage = (numberOfPost / 20)
+	} else {
+		numberOfPage = (numberOfPost / 20) + 1
+	}
 
-	return result, pageNumber, nil
+	return result, numberOfPage, nil
 }
 
 func (p *postServices) GetPost(id int) (dto.PublicPost, error) {
@@ -101,17 +124,31 @@ func (p *postServices) GetPost(id int) (dto.PublicPost, error) {
 	if err != nil {
 		return dto.PublicPost{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
+	likeCount, _ := p.IDatabase.CountPostLike(int(post.ID))
+	commentCount, _ := p.IDatabase.CountPostComment(int(post.ID))
+	dislikeCount, _ := p.IDatabase.CountPostDislike(int(post.ID))
 	result := dto.PublicPost{
 		Model:     post.Model,
 		Title:     post.Title,
 		Photo:     post.Photo,
 		Body:      post.Body,
-		UserID:    post.UserID,
-		Username:  post.User.Username,
-		TopicID:   post.TopicID,
-		Topicname: post.Topic.Name,
 		CreatedAt: post.CreatedAt,
 		IsActive:  post.IsActive,
+		User: dto.PostUser{
+			UserID:   post.UserID,
+			Photo:    post.User.Photo,
+			Username: post.User.Username,
+		},
+		Topic: dto.PostTopic{
+			TopicID:   post.TopicID,
+			TopicName: post.Topic.Name,
+		},
+		Count: dto.PostCount{
+			LikeCount:    likeCount,
+			CommentCount: commentCount,
+			DislikeCount: dislikeCount,
+		},
 	}
 
 	return result, nil
@@ -192,27 +229,45 @@ func (p *postServices) GetRecentPost(page int) ([]dto.PublicPost, int, error) {
 
 	var result []dto.PublicPost
 	for _, post := range posts {
+		likeCount, _ := p.IDatabase.CountPostLike(int(post.ID))
+		commentCount, _ := p.IDatabase.CountPostComment(int(post.ID))
+		dislikeCount, _ := p.IDatabase.CountPostDislike(int(post.ID))
 		result = append(result, dto.PublicPost{
 			Model:     post.Model,
 			Title:     post.Title,
 			Photo:     post.Photo,
 			Body:      post.Body,
-			UserID:    post.UserID,
-			Username:  post.User.Username,
-			TopicID:   post.TopicID,
-			Topicname: post.Topic.Name,
 			CreatedAt: post.CreatedAt,
 			IsActive:  post.IsActive,
+			User: dto.PostUser{
+				UserID:   post.UserID,
+				Username: post.User.Username,
+				Photo:    post.User.Photo,
+			},
+			Topic: dto.PostTopic{
+				TopicID:   post.TopicID,
+				TopicName: post.Topic.Name,
+			},
+			Count: dto.PostCount{
+				LikeCount:    likeCount,
+				CommentCount: commentCount,
+				DislikeCount: dislikeCount,
+			},
 		})
 	}
 
 	//count page number
-	pageNumber, errPage := p.IDatabase.CountPostPage()
+	numberOfPost, errPage := p.IDatabase.CountAllPost()
 	if errPage != nil {
 		return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	pageNumber = (pageNumber / 20) + 1
+	var numberOfPage int
+	if numberOfPost%20 == 0 {
+		numberOfPage = (numberOfPost / 20)
+	} else {
+		numberOfPage = (numberOfPost / 20) + 1
+	}
 
-	return result, pageNumber, nil
+	return result, numberOfPage, nil
 }

@@ -140,7 +140,7 @@ func (db GormSql) GetAllPostByTopic(id int, page int) ([]models.Post, error) {
 	//find topic id
 	err := db.DB.Where("topic_id = ?", id).Order("created_at DESC").Preload("User").Preload("Topic").Offset((page - 1) * 20).Limit(20).Find(&posts).Error
 	if err != nil {
-		return []models.Post{}, nil
+		return nil, err
 	}
 
 	return posts, nil
@@ -174,28 +174,6 @@ func (db GormSql) DeletePost(id int) error {
 	}
 
 	return nil
-}
-
-func (db GormSql) CountPostPage() (int, error) {
-	var pageNumber int64
-
-	err := db.DB.Model(&models.Post{}).Count(&pageNumber).Error
-	if err != nil {
-		return 0, err
-	}
-
-	return int(pageNumber), nil
-}
-
-func (db GormSql) CountPostByTopicPage(topicId int) (int, error) {
-	var pageNumber int64
-
-	err := db.DB.Model(&models.Post{}).Where("topic_id = ?", topicId).Count(&pageNumber).Error
-	if err != nil {
-		return 0, err
-	}
-
-	return int(pageNumber), nil
 }
 
 func (db GormSql) GetPostByIdWithAll(id int) (models.Post, error) {
@@ -310,7 +288,7 @@ func (db GormSql) DeleteReply(re int) error {
 func (db GormSql) GetLikeByUserAndPostId(userId int, postId int) (models.Like, error) {
 	var like models.Like
 
-	err := db.DB.Where("user_id = ?", userId).Where("post_id = ?", postId).First(&like).Error
+	err := db.DB.Where("user_id = ? AND post_id = ?", userId, postId).First(&like).Error
 	if err != nil {
 		return models.Like{}, err
 	}
@@ -334,4 +312,51 @@ func (db GormSql) SaveLike(like models.Like) error {
 	}
 
 	return nil
+}
+
+// Count ------------------------------------------------------------------------------------------------------------------------------------------------
+
+func (db GormSql) CountPostLike(postID int) (int, error) {
+	var postLike int64
+
+	err := db.DB.Model(&models.Like{}).Where("post_id = ? AND is_like = 1", postID).Count(&postLike).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return int(postLike), nil
+}
+func (db GormSql) CountPostDislike(postID int) (int, error) {
+	result := db.DB.Where("post_id = ? AND is_dislike = true", postID).Find(&models.Like{})
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return int(result.RowsAffected), nil
+}
+func (db GormSql) CountPostComment(postID int) (int, error) {
+	result := db.DB.Where("post_id = ?", postID).Find(&models.Comment{})
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return int(result.RowsAffected), nil
+}
+func (db GormSql) CountAllPost() (int, error) {
+	var pageNumber int64
+
+	err := db.DB.Model(&models.Post{}).Count(&pageNumber).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return int(pageNumber), nil
+}
+func (db GormSql) CountPostByTopicID(topicId int) (int, error) {
+	var countPost int64
+
+	err := db.DB.Model(&models.Post{}).Where("topic_id = ?", topicId).Count(&countPost).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return int(countPost), nil
 }

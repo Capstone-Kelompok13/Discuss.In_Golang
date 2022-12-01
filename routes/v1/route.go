@@ -23,7 +23,6 @@ import (
 func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	e := echo.New()
 
-	e.Pre(middleware.RemoveTrailingSlash())
 	mid.LogMiddleware(e)
 	cors := middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
@@ -79,15 +78,14 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	posts := v1.Group("/posts")
 	posts.POST("/create/:topic_name", pHandler.CreateNewPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	posts.GET("/all/:topic_name", pHandler.GetAllPost)
-	posts.GET("/all", pHandler.GetRecentPost)
+	posts.GET("/recents", pHandler.GetRecentPost)
 	posts.GET("/:post_id", pHandler.GetPost)
 	posts.PUT("/edit/:post_id", pHandler.EditPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	posts.DELETE("/delete/:post_id", pHandler.DeletePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
 	//endpoint Like
-	posts.PUT("/likes/:post_id", lHandler.LikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
-	posts.PUT("/dislikes/:post_id", lHandler.DislikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
-
+	posts.PUT("/like/:post_id", lHandler.LikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	posts.PUT("/dislike/:post_id", lHandler.DislikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	//endpoints comments
 	comments := posts.Group("/comments")
 	comments.GET("/:post_id", cHandler.GetAllComment)

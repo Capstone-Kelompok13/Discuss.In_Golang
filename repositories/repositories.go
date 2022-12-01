@@ -24,8 +24,6 @@ type IDatabase interface {
 	SavePost(post models.Post) error
 	DeletePost(postID int) error
 	GetPostByIdWithAll(postID int) (models.Post, error)
-	CountPostPage() (int, error)
-	CountPostByTopicPage(topicId int) (int, error)
 
 	SaveNewComment(comment models.Comment) error
 	GetAllCommentByPost(postID int) ([]models.Comment, error)
@@ -42,4 +40,10 @@ type IDatabase interface {
 	GetLikeByUserAndPostId(userId int, postId int) (models.Like, error)
 	SaveNewLike(like models.Like) error
 	SaveLike(like models.Like) error
+
+	CountPostLike(postID int) (int, error)
+	CountPostComment(postID int) (int, error)
+	CountPostDislike(postID int) (int, error)
+	CountAllPost() (int, error)
+	CountPostByTopicID(topicId int) (int, error)
 }

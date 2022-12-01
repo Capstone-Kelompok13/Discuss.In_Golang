@@ -52,15 +52,16 @@ func (h *PostHandler) GetAllPost(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
 
-	posts, pageNumber, err := h.IPostServices.GetPosts(topicName, page)
+	posts, numberOfPage, err := h.IPostServices.GetPosts(topicName, page)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message":     "success",
-		"data_post":   posts,
-		"page_number": pageNumber,
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":        "success",
+		"data":           posts,
+		"number_of_page": numberOfPage,
+		"page":           page,
 	})
 }
 
@@ -76,9 +77,9 @@ func (h *PostHandler) GetPost(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message":   "success",
-		"data_post": p,
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success",
+		"data":    p,
 	})
 }
 
@@ -105,7 +106,7 @@ func (h *PostHandler) EditPost(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "post updated",
 	})
 }
@@ -129,7 +130,7 @@ func (h *PostHandler) DeletePost(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "post deleted",
 	})
 }
@@ -138,13 +139,14 @@ func (h *PostHandler) GetRecentPost(c echo.Context) error {
 	//check if page exist
 	page, _ := strconv.Atoi(c.QueryParam("page"))
 
-	posts, pageNumber, err := h.IPostServices.GetRecentPost(page)
+	posts, numberOfPage, err := h.IPostServices.GetRecentPost(page)
 	if err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"message":     "success",
-		"data_post":   posts,
-		"page_number": pageNumber,
+		"message":        "success",
+		"data":           posts,
+		"number_of_page": numberOfPage,
+		"page":           page,
 	})
 }
