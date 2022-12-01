@@ -16,11 +16,11 @@ func NewPostServices(db repositories.IDatabase) IPostServices {
 
 type IPostServices interface {
 	CreatePost(post models.Post, name string, token dto.Token) error
-	GetPosts(name string, page int) ([]dto.PublicPost, error)
+	GetPosts(name string, page int) ([]dto.PublicPost, int, error)
 	GetPost(id int) (dto.PublicPost, error)
 	UpdatePost(newPost models.Post, id int, token dto.Token) error
 	DeletePost(id int, token dto.Token) error
-	GetRecentPost(page int) ([]dto.PublicPost, error)
+	GetRecentPost(page int) ([]dto.PublicPost, int, error)
 }
 
 type postServices struct {
@@ -52,11 +52,11 @@ func (p *postServices) CreatePost(post models.Post, name string, token dto.Token
 	return nil
 }
 
-func (p *postServices) GetPosts(name string, page int) ([]dto.PublicPost, error) {
+func (p *postServices) GetPosts(name string, page int) ([]dto.PublicPost, int, error) {
 	//find topic
 	topic, err := p.IDatabase.GetTopicByName(name)
 	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	//cek jika page kosong
@@ -66,7 +66,7 @@ func (p *postServices) GetPosts(name string, page int) ([]dto.PublicPost, error)
 
 	posts, err := p.IDatabase.GetAllPostByTopic(int(topic.ID), page)
 	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	var result []dto.PublicPost
@@ -85,7 +85,15 @@ func (p *postServices) GetPosts(name string, page int) ([]dto.PublicPost, error)
 		})
 	}
 
-	return result, nil
+	//count page number
+	pageNumber, errPage := p.IDatabase.CountPostByTopicPage(int(topic.ID))
+	if errPage != nil {
+		return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	pageNumber = (pageNumber / 20) + 1
+
+	return result, pageNumber, nil
 }
 
 func (p *postServices) GetPost(id int) (dto.PublicPost, error) {
@@ -167,7 +175,7 @@ func (p *postServices) DeletePost(id int, token dto.Token) error {
 	return nil
 }
 
-func (p *postServices) GetRecentPost(page int) ([]dto.PublicPost, error) {
+func (p *postServices) GetRecentPost(page int) ([]dto.PublicPost, int, error) {
 	//cek jika page kosong
 	if page < 1 {
 		page = 1
@@ -176,9 +184,9 @@ func (p *postServices) GetRecentPost(page int) ([]dto.PublicPost, error) {
 	posts, err := p.IDatabase.GetRecentPost(page)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return nil, echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return nil, 0, echo.NewHTTPError(http.StatusNotFound, err.Error())
 		} else {
-			return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
 
@@ -198,5 +206,13 @@ func (p *postServices) GetRecentPost(page int) ([]dto.PublicPost, error) {
 		})
 	}
 
-	return result, nil
+	//count page number
+	pageNumber, errPage := p.IDatabase.CountPostPage()
+	if errPage != nil {
+		return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	pageNumber = (pageNumber / 20) + 1
+
+	return result, pageNumber, nil
 }

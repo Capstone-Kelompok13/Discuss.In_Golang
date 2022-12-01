@@ -23,6 +23,8 @@ type IDatabase interface {
 	SavePost(post models.Post) error
 	DeletePost(postID int) error
 	GetPostByIdWithAll(postID int) (models.Post, error)
+	CountPostPage() (int, error)
+	CountPostByTopicPage(topicId int) (int, error)
 
 	SaveNewComment(comment models.Comment) error
 	GetAllCommentByPost(postID int) ([]models.Comment, error)
