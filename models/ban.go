@@ -15,5 +15,5 @@ type Ban struct {
 }
 
 func (Ban) TableName() string {
-	return "bans"
+	return "Bans"
 }

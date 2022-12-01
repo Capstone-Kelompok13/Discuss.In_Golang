@@ -3,12 +3,13 @@ package helper
 import (
 	"discusiin/configs"
 	"discusiin/dto"
-	"errors"
+	"net/http"
 	"regexp"
 	"strings"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func IsEmailValid(e string) bool {
@@ -21,7 +22,7 @@ func DecodeJWT(ctx echo.Context) (dto.Token, error) {
 
 	auth := ctx.Request().Header.Get("Authorization")
 	if auth == "" {
-		return dto.Token{}, errors.New("authorization header not found")
+		return dto.Token{}, echo.NewHTTPError(http.StatusBadRequest, "authorization header not found")
 	}
 
 	splitToken := strings.Split(auth, "Bearer ")
@@ -31,7 +32,7 @@ func DecodeJWT(ctx echo.Context) (dto.Token, error) {
 		return []byte(configs.Cfg.TokenSecret), nil
 	})
 	if err != nil {
-		return dto.Token{}, errors.New("token is wrong or expired")
+		return dto.Token{}, echo.NewHTTPError(http.StatusUnauthorized, "token is wrong or expired")
 	}
 
 	if claims, ok := token.Claims.(*dto.Token); ok && token.Valid {
@@ -42,6 +43,16 @@ func DecodeJWT(ctx echo.Context) (dto.Token, error) {
 	return t, nil
 }
 
-func URLMinusToSpace(url_param_value string) string {
-	return strings.ReplaceAll(url_param_value, "-", " ")
+func URLDecodeReformat(url_param_value string) string {
+	return strings.ReplaceAll(url_param_value, "%20", " ")
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }

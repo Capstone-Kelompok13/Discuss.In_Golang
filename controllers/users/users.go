@@ -17,46 +17,34 @@ func (h *UserHandler) Register(c echo.Context) error {
 	// validation
 	var u models.User
 
-	err := c.Bind(&u)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": err.Error(),
-		})
+	errBind := c.Bind(&u)
+	if errBind != nil {
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
 	}
 
 	// isEmailKosong?
 	if u.Email == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "email should not be empty",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "email should not be empty")
 	}
 	// isEmailValid?
 	valid := helper.IsEmailValid(u.Email)
 	if !valid {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "email invalid",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "email invalid")
 	}
 	// isUsernameKosong?
 	if u.Username == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "username should not be empty",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "username should not be empty")
 	}
 	// isPasswordKosong?
 	if u.Password == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "password should not be empty",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "password should not be empty")
 	}
 	// isPasswordLessThan8?
 	if len(u.Password) < 8 {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "password can not less than 8",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "password should not lower than 8")
 	}
 
-	err = h.IUserServices.Register(u)
+	err := h.IUserServices.Register(u)
 	if err != nil {
 		return err
 	}

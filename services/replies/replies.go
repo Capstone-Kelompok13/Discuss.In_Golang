@@ -4,7 +4,9 @@ import (
 	"discusiin/dto"
 	"discusiin/models"
 	"discusiin/repositories"
-	"errors"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 func NewReplyServices(db repositories.IDatabase) IReplyServices {
@@ -26,7 +28,11 @@ func (r *replyServices) CreateReply(reply models.Reply, co int, token dto.Token)
 	//get comment
 	comment, err := r.IDatabase.GetCommentById(co)
 	if err != nil {
-		return err
+		if err.Error() == "record not found" {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	//input empty field in reply
@@ -36,20 +42,24 @@ func (r *replyServices) CreateReply(reply models.Reply, co int, token dto.Token)
 	//create reply
 	err = r.IDatabase.SaveNewReply(reply)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil
 }
 
 func (r *replyServices) GetAllReply(commentId int) ([]dto.PublicReply, error) {
-	replys, err := r.IDatabase.GetAllReplyByComment(commentId)
+	replies, err := r.IDatabase.GetAllReplyByComment(commentId)
 	if err != nil {
-		return []dto.PublicReply{}, err
+		if err.Error() == "record not found" {
+			return nil, echo.NewHTTPError(http.StatusNotFound, err.Error())
+		} else {
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	var result []dto.PublicReply
-	for _, reply := range replys {
+	for _, reply := range replies {
 		result = append(result, dto.PublicReply{
 			Model:     reply.Model,
 			UserID:    reply.UserID,
@@ -66,12 +76,16 @@ func (r *replyServices) UpdateReply(newReply models.Reply, replyId int, token dt
 	//find reply
 	reply, err := r.IDatabase.GetReplyById(replyId)
 	if err != nil {
-		return err
+		if err.Error() == "record not found" {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	//check if user are correct
 	if reply.UserID != int(token.ID) {
-		return errors.New("user not eligible")
+		return echo.NewHTTPError(http.StatusUnauthorized, "you are not the reply owner")
 	}
 
 	//update reply field
@@ -81,7 +95,7 @@ func (r *replyServices) UpdateReply(newReply models.Reply, replyId int, token dt
 	//update reply
 	err = r.IDatabase.SaveReply(reply)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil
@@ -91,18 +105,22 @@ func (r *replyServices) DeleteReply(replyId int, token dto.Token) error {
 	//find reply
 	reply, err := r.IDatabase.GetReplyById(replyId)
 	if err != nil {
-		return err
+		if err.Error() == "record not found" {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	//check if user are correct
 	if reply.UserID != int(token.ID) {
-		return errors.New("user not eligible")
+		return echo.NewHTTPError(http.StatusUnauthorized, "you are not the reply owner")
 	}
 
 	//delete reply
 	err = r.IDatabase.DeleteReply(replyId)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil

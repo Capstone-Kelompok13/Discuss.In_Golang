@@ -4,7 +4,6 @@ import (
 	"discusiin/dto"
 	"discusiin/models"
 	"discusiin/repositories"
-	"errors"
 	"net/http"
 	"time"
 
@@ -16,8 +15,6 @@ func NewPostServices(db repositories.IDatabase) IPostServices {
 }
 
 type IPostServices interface {
-	GetTopic(name string) (int, error)
-
 	CreatePost(post models.Post, name string, token dto.Token) error
 	GetPosts(name string) ([]dto.PublicPost, error)
 	GetPost(id int) (dto.PublicPost, error)
@@ -30,20 +27,11 @@ type postServices struct {
 	repositories.IDatabase
 }
 
-func (p *postServices) GetTopic(name string) (int, error) {
-	topic, err := p.IDatabase.GetTopicByName(name)
-	if err != nil {
-		return 0, err
-	}
-
-	return int(topic.ID), nil
-}
-
 func (p *postServices) CreatePost(post models.Post, name string, token dto.Token) error {
 	//find topic
 	topic, err := p.IDatabase.GetTopicByName(name)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	//owner
@@ -58,7 +46,7 @@ func (p *postServices) CreatePost(post models.Post, name string, token dto.Token
 	//save post
 	err = p.IDatabase.SaveNewPost(post)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil
@@ -68,10 +56,14 @@ func (p *postServices) GetPosts(name string) ([]dto.PublicPost, error) {
 	//find topic
 	topic, err := p.IDatabase.GetTopicByName(name)
 	if err != nil {
-		return nil, err
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	posts, err := p.IDatabase.GetAllPostByTopic(int(topic.ID))
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	var result []dto.PublicPost
 	for _, v := range posts {
 		result = append(result, dto.PublicPost{
@@ -87,9 +79,6 @@ func (p *postServices) GetPosts(name string) ([]dto.PublicPost, error) {
 			IsActive:  v.IsActive,
 		})
 	}
-	if err != nil {
-		return nil, err
-	}
 
 	return result, nil
 }
@@ -97,7 +86,7 @@ func (p *postServices) GetPosts(name string) ([]dto.PublicPost, error) {
 func (p *postServices) GetPost(id int) (dto.PublicPost, error) {
 	post, err := p.IDatabase.GetPostById(id)
 	if err != nil {
-		return dto.PublicPost{}, err
+		return dto.PublicPost{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	result := dto.PublicPost{
 		Model:     post.Model,
@@ -119,11 +108,15 @@ func (p *postServices) UpdatePost(newPost models.Post, postID int, token dto.Tok
 	//get previous post
 	post, err := p.IDatabase.GetPostById(postID)
 	if err != nil {
-		return err
+		if err.Error() == "record not found" {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	if int(token.ID) != post.UserID {
-		return errors.New("user not eligible")
+		return echo.NewHTTPError(http.StatusUnauthorized, "you are not the post owner")
 	}
 
 	//update post body
@@ -132,7 +125,7 @@ func (p *postServices) UpdatePost(newPost models.Post, postID int, token dto.Tok
 
 	err = p.IDatabase.SavePost(post)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil
@@ -142,24 +135,28 @@ func (p *postServices) DeletePost(id int, token dto.Token) error {
 	//find post
 	post, err := p.IDatabase.GetPostById(id)
 	if err != nil {
-		return err
+		if err.Error() == "record not found" {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	//check user
 	user, err := p.IDatabase.GetUserByUsername(token.Username)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if !user.IsAdmin {
 		if int(token.ID) != post.UserID {
-			return errors.New("user not eligible")
+			return echo.NewHTTPError(http.StatusUnauthorized, "you are not the post owner")
 		}
 	}
 
 	err = p.IDatabase.DeletePost(id)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil
@@ -168,7 +165,11 @@ func (p *postServices) DeletePost(id int, token dto.Token) error {
 func (p *postServices) GetRecentPost() ([]dto.PublicPost, error) {
 	posts, err := p.IDatabase.GetRecentPost()
 	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		if err.Error() == "record not found" {
+			return nil, echo.NewHTTPError(http.StatusNotFound, err.Error())
+		} else {
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	var result []dto.PublicPost

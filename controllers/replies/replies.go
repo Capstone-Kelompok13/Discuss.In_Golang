@@ -19,37 +19,28 @@ func (h *ReplyHandler) CreateReply(c echo.Context) error {
 	// c.Bind(&reply)
 	errBind := c.Bind(&reply)
 	if errBind != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errBind.Error(),
-		})
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
 	}
 
 	//get logged userId
 	token, errDecodeJWT := helper.DecodeJWT(c)
 	if errDecodeJWT != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errDecodeJWT.Error(),
-		})
+		return errDecodeJWT
 	}
-	// reply.UserID = 1 //untuk percobaan
 
 	//get comment id
 	commentId, errAtoi := strconv.Atoi(c.Param("comment_id"))
 	if errAtoi != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errAtoi.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
 
 	err := h.IReplyServices.CreateReply(reply, commentId, token)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
+		return err
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "Reply Created",
+		"message": "reply created",
 	})
 }
 
@@ -57,22 +48,18 @@ func (h *ReplyHandler) GetAllReply(c echo.Context) error {
 	//get comment id
 	commentId, errAtoi := strconv.Atoi(c.Param("comment_id"))
 	if errAtoi != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errAtoi.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
 
 	//get all reply from comment
-	replys, err := h.IReplyServices.GetAllReply(commentId)
+	replies, err := h.IReplyServices.GetAllReply(commentId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": err.Error(),
-		})
+		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message":    "Succes",
-		"data_reply": replys,
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":    "success",
+		"data_reply": replies,
 	})
 }
 
@@ -80,40 +67,29 @@ func (h *ReplyHandler) UpdateReply(c echo.Context) error {
 	var newReply models.Reply
 	errBind := c.Bind(&newReply)
 	if errBind != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errBind.Error(),
-			// "message": errors.New("hallo semuanya"),
-		})
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
 	}
 
 	//get logged userId
 	token, errDecodeJWT := helper.DecodeJWT(c)
 	if errDecodeJWT != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errDecodeJWT.Error(),
-			// "message": errors.New("hai"),
-		})
+		return errDecodeJWT
 	}
 
 	//get reply id
 	replyId, errAtoi := strconv.Atoi(c.Param("reply_id"))
 	if errAtoi != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errAtoi.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
 
 	//update reply
 	err := h.IReplyServices.UpdateReply(newReply, replyId, token)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-			// "message": errors.New("hallo semua"),
-		})
+		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "Reply Updated",
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "reply updated",
 	})
 }
 
@@ -121,29 +97,22 @@ func (h *ReplyHandler) DeleteReply(c echo.Context) error {
 	//get logged userId
 	token, errDecodeJWT := helper.DecodeJWT(c)
 	if errDecodeJWT != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errDecodeJWT.Error(),
-			// "message": errors.New("hai"),
-		})
+		return errDecodeJWT
 	}
 
 	//get reply id
 	replyId, errAtoi := strconv.Atoi(c.Param("reply_id"))
 	if errAtoi != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errAtoi.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
 
 	//delete reply
 	err := h.IReplyServices.DeleteReply(replyId, token)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
+		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "Reply Deleted",
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "reply deleted",
 	})
 }

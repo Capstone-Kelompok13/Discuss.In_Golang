@@ -4,7 +4,9 @@ import (
 	"discusiin/dto"
 	"discusiin/models"
 	"discusiin/repositories"
-	"errors"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 func NewCommentServices(db repositories.IDatabase) ICommentServices {
@@ -26,7 +28,11 @@ func (c *commentServices) CreateComment(comment models.Comment, postID int, toke
 	//get post
 	post, err := c.IDatabase.GetPostById(postID)
 	if err != nil {
-		return err
+		if err.Error() == "record not found" {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	//fill empty comment field
@@ -36,7 +42,7 @@ func (c *commentServices) CreateComment(comment models.Comment, postID int, toke
 
 	err = c.IDatabase.SaveNewComment(comment)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil
@@ -45,7 +51,11 @@ func (c *commentServices) CreateComment(comment models.Comment, postID int, toke
 func (c *commentServices) GetAllComments(id int) ([]dto.PublicComment, error) {
 	comments, err := c.IDatabase.GetAllCommentByPost(id)
 	if err != nil {
-		return nil, err
+		if err.Error() == "record not found" {
+			return nil, echo.NewHTTPError(http.StatusNotFound, err.Error())
+		} else {
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	var result []dto.PublicComment
@@ -66,12 +76,16 @@ func (c *commentServices) UpdateComment(newComment models.Comment, token dto.Tok
 	//get comment
 	comment, err := c.IDatabase.GetCommentById(int(newComment.ID))
 	if err != nil {
-		return err
+		if err.Error() == "record not found" {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	//check user
 	if comment.UserID != int(token.ID) {
-		return errors.New("user not eligible")
+		return echo.NewHTTPError(http.StatusUnauthorized, "you are not this comment owner")
 	}
 
 	//update comment field
@@ -81,7 +95,7 @@ func (c *commentServices) UpdateComment(newComment models.Comment, token dto.Tok
 	//save comment
 	err = c.IDatabase.SaveComment(comment)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil
@@ -91,17 +105,21 @@ func (c *commentServices) DeleteComment(commentID int, token dto.Token) error {
 	//get comment
 	comment, err := c.IDatabase.GetCommentById(commentID)
 	if err != nil {
-		return err
+		if err.Error() == "record not found" {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	//check user
 	if comment.UserID != int(token.ID) {
-		return errors.New("user not eligible")
+		return echo.NewHTTPError(http.StatusUnauthorized, "you are not this comment owner")
 	}
 
 	err = c.IDatabase.DeleteComment(commentID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil

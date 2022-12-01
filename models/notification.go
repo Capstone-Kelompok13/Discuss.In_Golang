@@ -17,5 +17,5 @@ type Notification struct {
 }
 
 func (Notification) TableName() string {
-	return "notifications"
+	return "Notifications"
 }

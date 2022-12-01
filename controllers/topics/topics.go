@@ -20,37 +20,27 @@ func (h *TopicHandler) CreateNewTopic(c echo.Context) error {
 
 	errBind := c.Bind(&topic)
 	if errBind != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": errBind.Error(),
-		})
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
 	}
 
 	token, errDecodeJWT := helper.DecodeJWT(c)
 	if errDecodeJWT != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errDecodeJWT.Error(),
-		})
+		return errDecodeJWT
 	}
 
 	//is title empty
 	if topic.Name == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "topic name should not be empty",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "topic name should not be empty")
 	}
 
 	//is description empty
 	if topic.Description == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "topic description should not be empty",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "description name should not be empty")
 	}
 
 	err := h.ITopicServices.CreateTopic(topic, token)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
+		return err
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
@@ -61,13 +51,11 @@ func (h *TopicHandler) CreateNewTopic(c echo.Context) error {
 func (h *TopicHandler) GetAllTopics(c echo.Context) error {
 	topics, err := h.ITopicServices.GetTopics()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
+		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message":    "Success",
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":    "success",
 		"data_topic": topics,
 	})
 }
@@ -76,19 +64,15 @@ func (h *TopicHandler) GetTopic(c echo.Context) error {
 
 	id, errAtoi := strconv.Atoi(c.Param("topic_id"))
 	if errAtoi != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errAtoi.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
 
 	topic, err := h.ITopicServices.GetTopic(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
+		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message":    "success",
 		"data_topic": topic,
 	})
@@ -100,40 +84,24 @@ func (h *TopicHandler) UpdateTopicDescription(c echo.Context) error {
 	var newTopic models.Topic
 	errBind := c.Bind(&newTopic)
 	if errBind != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errBind.Error(),
-		})
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
 	}
 
 	token, errDecodeJWT := helper.DecodeJWT(c)
 	if errDecodeJWT != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errDecodeJWT.Error(),
-		})
+		return errDecodeJWT
 	}
 
 	id, errAtoi := strconv.Atoi(c.Param("topic_id"))
 	if errAtoi != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errAtoi.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
 
-	//check if data exist
-	topic, err := h.ITopicServices.GetTopic(id)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
-	}
+	newTopic.ID = uint(id)
 
-	//save topic
-	topic.Description = newTopic.Description
-	err = h.ITopicServices.SaveTopic(topic, token)
+	err := h.ITopicServices.UpdateTopicDescription(newTopic, token)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
+		return err
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
@@ -144,16 +112,12 @@ func (h *TopicHandler) UpdateTopicDescription(c echo.Context) error {
 func (h *TopicHandler) DeleteTopic(c echo.Context) error {
 	id, errAtoi := strconv.Atoi(c.Param("topic_id"))
 	if errAtoi != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": errAtoi.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
 
 	err := h.ITopicServices.RemoveTopic(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
+		return err
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
