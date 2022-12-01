@@ -118,19 +118,19 @@ func (db GormSql) SaveNewPost(post models.Post) error {
 
 	return nil
 }
-func (db GormSql) GetRecentPost() ([]models.Post, error) {
+func (db GormSql) GetRecentPost(page int) ([]models.Post, error) {
 	var result []models.Post
-	err := db.DB.Order("created_at DESC").Preload("User").Preload("Topic").Limit(20).Find(&result).Error
+	err := db.DB.Order("created_at DESC").Preload("User").Preload("Topic").Offset((page - 1) * 20).Limit(20).Find(&result).Error
 	if err != nil {
 		return nil, err
 	}
 	return result, nil
 }
-func (db GormSql) GetAllPostByTopic(id int) ([]models.Post, error) {
+func (db GormSql) GetAllPostByTopic(id int, page int) ([]models.Post, error) {
 	var posts []models.Post
 
 	//find topic id
-	err := db.DB.Where("topic_id = ?", id).Order("created_at DESC").Preload("User").Preload("Topic").Find(&posts).Error
+	err := db.DB.Where("topic_id = ?", id).Order("created_at DESC").Preload("User").Preload("Topic").Offset((page - 1) * 20).Limit(20).Find(&posts).Error
 	if err != nil {
 		return []models.Post{}, nil
 	}

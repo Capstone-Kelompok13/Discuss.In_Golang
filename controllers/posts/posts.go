@@ -46,7 +46,10 @@ func (h *PostHandler) GetAllPost(c echo.Context) error {
 	url_param_value := c.Param("topic_name")
 	topicName := helper.URLDecodeReformat(url_param_value)
 
-	posts, err := h.IPostServices.GetPosts(topicName)
+	//check if page exist
+	page, _ := strconv.Atoi(c.QueryParam("page"))
+
+	posts, err := h.IPostServices.GetPosts(topicName, page)
 	if err != nil {
 		return err
 	}
@@ -128,7 +131,10 @@ func (h *PostHandler) DeletePost(c echo.Context) error {
 }
 
 func (h *PostHandler) GetRecentPost(c echo.Context) error {
-	posts, err := h.IPostServices.GetRecentPost()
+	//check if page exist
+	page, _ := strconv.Atoi(c.QueryParam("page"))
+
+	posts, err := h.IPostServices.GetRecentPost(page)
 	if err != nil {
 		return err
 	}
