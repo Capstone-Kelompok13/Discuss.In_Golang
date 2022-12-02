@@ -41,6 +41,11 @@ type IDatabase interface {
 	SaveNewLike(like models.Like) error
 	SaveLike(like models.Like) error
 
+	SaveBookmark(bookmark models.Bookmark) error
+	GetBookmark(userId int, postId int) (models.Bookmark, error)
+	DeleteBookmark(bookmarkId int) error
+	GetAllBookmark(userId int) ([]models.Bookmark, error)
+
 	CountPostLike(postID int) (int, error)
 	CountPostComment(postID int) (int, error)
 	CountPostDislike(postID int) (int, error)

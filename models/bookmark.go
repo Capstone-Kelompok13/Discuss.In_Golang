@@ -9,7 +9,7 @@ type Bookmark struct {
 	UserID int `json:"userId" form:"userId"`
 	PostID int `json:"postId" form:"postId"`
 
-	User User
+	// User User
 	Post Post
 }
 

@@ -314,6 +314,47 @@ func (db GormSql) SaveLike(like models.Like) error {
 	return nil
 }
 
+// Bookmark ------------------------------------------------------------------------------------------------------------------------------------------------
+func (db GormSql) SaveBookmark(bookmark models.Bookmark) error {
+	err := db.DB.Create(&bookmark).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db GormSql) GetBookmark(userId int, postId int) (models.Bookmark, error) {
+	var bookmark models.Bookmark
+
+	err := db.DB.Where("user_id = ?", userId).Where("post_id = ?", postId).First(&bookmark).Error
+	if err != nil {
+		return models.Bookmark{}, err
+	}
+
+	return bookmark, nil
+}
+
+func (db GormSql) DeleteBookmark(bookmarkId int) error {
+	err := db.DB.Delete(&models.Bookmark{}, bookmarkId).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db GormSql) GetAllBookmark(userId int) ([]models.Bookmark, error) {
+	var bookmarks []models.Bookmark
+
+	err := db.DB.Where("user_id = ?", userId).Order("created_at DESC").Preload("Post").Find(&bookmarks).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return bookmarks, nil
+}
+
 // Count ------------------------------------------------------------------------------------------------------------------------------------------------
 
 func (db GormSql) CountPostLike(postID int) (int, error) {

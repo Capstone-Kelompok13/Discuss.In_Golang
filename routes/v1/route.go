@@ -4,6 +4,7 @@ import (
 	// "discusiin/controllers/topics"
 
 	"discusiin/configs"
+	"discusiin/controllers/bookmarks"
 	"discusiin/controllers/comments"
 	"discusiin/controllers/likes"
 	"discusiin/controllers/posts"
@@ -57,6 +58,10 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 		ILikeServices: payload.GetLikeServices(),
 	}
 
+	bHandler := bookmarks.BookmarkHandler{
+		IBookmarkServices: payload.GetBookmarkServices(),
+	}
+
 	api := e.Group("/api")
 	v1 := api.Group("/v1")
 
@@ -86,6 +91,13 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	//endpoint Like
 	posts.PUT("/like/:post_id", lHandler.LikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	posts.PUT("/dislike/:post_id", lHandler.DislikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+
+	//endpoint bookmark
+	bookmarks := posts.Group("/bookmarks")
+	bookmarks.POST("/:post_id", bHandler.AddBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	bookmarks.DELETE("/:post_id", bHandler.DeleteBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	bookmarks.GET("/all", bHandler.GetAllBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+
 	//endpoints comments
 	comments := posts.Group("/comments")
 	comments.GET("/:post_id", cHandler.GetAllComment)

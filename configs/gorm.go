@@ -41,6 +41,7 @@ func InitDatabase() {
 		&models.Comment{},
 		&models.Reply{},
 		&models.Like{},
+		&models.Bookmark{},
 	)
 
 	if err != nil {

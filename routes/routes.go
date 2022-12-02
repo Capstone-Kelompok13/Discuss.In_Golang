@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"discusiin/configs"
 	"discusiin/repositories"
+	bService "discusiin/services/bookmarks"
 	cService "discusiin/services/comments"
 	lService "discusiin/services/likes"
 	pService "discusiin/services/posts"
@@ -25,6 +26,7 @@ type Payload struct {
 	cService cService.ICommentServices
 	rService rService.IReplyServices
 	lService lService.ILikeServices
+	bService bService.IBookmarkServices
 }
 
 func (p *Payload) InitUserService() {
@@ -136,4 +138,21 @@ func (p *Payload) InitLikeService() {
 	}
 
 	p.lService = lService.NewLikeServices(p.repoSql)
+}
+
+// Bookmark -----------------------------------------------------------------------------------------------------------------
+func (p *Payload) GetBookmarkServices() bService.IBookmarkServices {
+	if p.bService == nil {
+		p.InitBookmarkService()
+	}
+
+	return p.bService
+}
+
+func (p *Payload) InitBookmarkService() {
+	if p.repoSql == nil {
+		p.InitRepoMysql()
+	}
+
+	p.bService = bService.NewBookmarkServices(p.repoSql)
 }
