@@ -1,0 +1,96 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Dokumentasi API Diskusi.in.",
+        "title": "Diskusi.in API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "35.78.120.202",
+    "basePath": "/api/v1",
+    "paths": {
+        "/api/v1/posts/comments/create/{post_id}": {
+            "post": {
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ],
+                "description": "Create a Comment.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Create Comment.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Topic ID",
+                        "name": "topic_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Comment Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "comment created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error parsing",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "token is wrong or expired",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "post not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "415": {
+                        "description": "Unsupported Media Type",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "error get post by id",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,65 @@
+basePath: /api/v1
+host: 35.78.120.202
+info:
+  contact: {}
+  description: Dokumentasi API Diskusi.in.
+  title: Diskusi.in API
+  version: "1.0"
+paths:
+  /api/v1/posts/comments/create/{post_id}:
+    post:
+      consumes:
+      - application/json
+      description: Create a Comment.
+      parameters:
+      - description: Topic ID
+        in: path
+        name: topic_id
+        required: true
+        type: integer
+      - description: Comment Body
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: comment created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error parsing
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: token is wrong or expired
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: post not found
+          schema:
+            additionalProperties: true
+            type: object
+        "415":
+          description: Unsupported Media Type
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: error get post by id
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - jwt: []
+      summary: Create Comment.
+      tags:
+      - Comments
+swagger: "2.0"

@@ -14,6 +14,23 @@ type CommentHandler struct {
 	comments.ICommentServices
 }
 
+// CreateComment godoc
+// @Summary Create Comment.
+// @Description Create a Comment.
+// @Tags Comments
+// @Accept json
+// @Produce json
+// @Security jwt
+// @Param topic_id path int true "Topic ID"
+// @Param body body map[string]interface{} true "Comment Body"
+// @Success 201 {object} map[string]interface{} "comment created"
+// @Failure 415 {object} map[string]interface{} "Unsupported Media Type"
+// @Failure 400 {object} map[string]interface{} "authorization header not found"
+// @Failure 401 {object} map[string]interface{} "token is wrong or expired"
+// @Failure 400 {object} map[string]interface{} "error parsing"
+// @Failure 404 {object} map[string]interface{} "post not found"
+// @Failure 500 {object} map[string]interface{} "error get post by id"
+// @Router /api/v1/posts/comments/create/{post_id} [post]
 func (h *CommentHandler) CreateComment(c echo.Context) error {
 	var comment models.Comment
 	errBind := c.Bind(&comment)

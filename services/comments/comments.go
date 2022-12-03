@@ -29,7 +29,7 @@ func (c *commentServices) CreateComment(comment models.Comment, postID int, toke
 	post, err := c.IDatabase.GetPostById(postID)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "post not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
