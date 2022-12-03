@@ -20,7 +20,7 @@ func (h *UserHandler) Register(c echo.Context) error {
 
 	errBind := c.Bind(&u)
 	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
+		return errBind
 	}
 
 	// isEmailKosong?
@@ -60,7 +60,7 @@ func (h *UserHandler) Login(c echo.Context) error {
 	var u models.User
 	err := c.Bind(&u)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return err
 	}
 
 	if u.Email == "" {

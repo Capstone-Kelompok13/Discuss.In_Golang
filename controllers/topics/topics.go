@@ -20,7 +20,7 @@ func (h *TopicHandler) CreateNewTopic(c echo.Context) error {
 
 	errBind := c.Bind(&topic)
 	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
+		return errBind
 	}
 
 	token, errDecodeJWT := helper.DecodeJWT(c)
@@ -84,7 +84,7 @@ func (h *TopicHandler) UpdateTopicDescription(c echo.Context) error {
 	var newTopic models.Topic
 	errBind := c.Bind(&newTopic)
 	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
+		return errBind
 	}
 
 	token, errDecodeJWT := helper.DecodeJWT(c)

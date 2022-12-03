@@ -57,7 +57,6 @@ func (t *topicServices) CreateTopic(topic models.Topic, token dto.Token) error {
 	// isExist?
 	_, errGetTopicByName := t.IDatabase.GetTopicByName(topic.Name)
 	if errGetTopicByName != nil {
-
 		if errGetTopicByName.Error() == "record not found" {
 			errSaveNewTopic := t.IDatabase.SaveNewTopic(topic)
 			if errSaveNewTopic != nil {

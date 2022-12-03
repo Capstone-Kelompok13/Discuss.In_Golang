@@ -45,7 +45,12 @@ func (h *PostHandler) CreateNewPost(c echo.Context) error {
 func (h *PostHandler) GetAllPost(c echo.Context) error {
 	url_param_value := c.Param("topic_name")
 	topicName := helper.URLDecodeReformat(url_param_value)
-
+	if url_param_value == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "topic name should not be empty")
+	}
+	if topicName == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "topic name should not be empty")
+	}
 	//check if page exist
 	page, errAtoi := strconv.Atoi(c.QueryParam("page"))
 	if errAtoi != nil {
