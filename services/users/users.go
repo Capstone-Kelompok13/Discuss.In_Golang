@@ -107,7 +107,7 @@ func (s *userServices) GetUsers(token dto.Token, page int) ([]dto.PublicUser, er
 	u, errGetUserByUsername := s.IDatabase.GetUserByUsername(token.Username)
 	if errGetUserByUsername != nil {
 		if errGetUserByUsername.Error() == "record not found" {
-			return nil, echo.NewHTTPError(http.StatusNotFound, errGetUserByUsername.Error())
+			return nil, echo.NewHTTPError(http.StatusNotFound, "your JWT does not have username field")
 		} else {
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, errGetUserByUsername.Error())
 		}
