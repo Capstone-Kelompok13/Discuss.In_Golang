@@ -88,16 +88,6 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	posts.PUT("/edit/:post_id", pHandler.EditPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	posts.DELETE("/delete/:post_id", pHandler.DeletePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
-	//endpoint Like
-	posts.PUT("/like/:post_id", lHandler.LikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
-	posts.PUT("/dislike/:post_id", lHandler.DislikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
-
-	//endpoint bookmark
-	bookmarks := posts.Group("/bookmarks")
-	bookmarks.POST("/:post_id", bHandler.AddBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
-	bookmarks.DELETE("/:post_id", bHandler.DeleteBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
-	bookmarks.GET("/all", bHandler.GetAllBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
-
 	//endpoints comments
 	comments := posts.Group("/comments")
 	comments.GET("/:post_id", cHandler.GetAllComment)
@@ -111,6 +101,16 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	replys.POST("/create/:comment_id", rHandler.CreateReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	replys.PUT("/edit/:reply_id", rHandler.UpdateReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	replys.DELETE("/delete/:reply_id", rHandler.DeleteReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+
+	//endpoint Like
+	posts.PUT("/like/:post_id", lHandler.LikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	posts.PUT("/dislike/:post_id", lHandler.DislikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+
+	//endpoint bookmark
+	bookmarks := posts.Group("/bookmarks")
+	bookmarks.POST("/:post_id", bHandler.AddBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	bookmarks.DELETE("/:post_id", bHandler.DeleteBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	bookmarks.GET("/all", bHandler.GetAllBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
 	return e, trace
 }
