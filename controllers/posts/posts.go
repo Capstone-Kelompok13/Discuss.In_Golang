@@ -38,7 +38,7 @@ func (h *PostHandler) CreateNewPost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "post created",
+		"message": "Post created",
 	})
 }
 
@@ -58,7 +58,7 @@ func (h *PostHandler) GetAllPost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":        "success",
+		"message":        "Success",
 		"data":           posts,
 		"number_of_page": numberOfPage,
 		"page":           page,
@@ -78,7 +78,7 @@ func (h *PostHandler) GetPost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success",
+		"message": "Success",
 		"data":    p,
 	})
 }
@@ -107,7 +107,7 @@ func (h *PostHandler) EditPost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "post updated",
+		"message": "Post updated",
 	})
 }
 
@@ -131,7 +131,7 @@ func (h *PostHandler) DeletePost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "post deleted",
+		"message": "Post deleted",
 	})
 }
 
@@ -144,7 +144,7 @@ func (h *PostHandler) GetRecentPost(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"message":        "success",
+		"message":        "Success",
 		"data":           posts,
 		"number_of_page": numberOfPage,
 		"page":           page,

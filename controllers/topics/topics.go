@@ -44,7 +44,7 @@ func (h *TopicHandler) CreateNewTopic(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "topic created",
+		"message": "Topic created",
 	})
 }
 
@@ -55,7 +55,7 @@ func (h *TopicHandler) GetAllTopics(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success",
+		"message": "Success",
 		"data":    topics,
 	})
 }
@@ -73,7 +73,7 @@ func (h *TopicHandler) GetTopic(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success",
+		"message": "Success",
 		"data":    topic,
 	})
 }
@@ -105,7 +105,7 @@ func (h *TopicHandler) UpdateTopicDescription(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "topic updated",
+		"message": "Topic updated",
 	})
 }
 
@@ -121,6 +121,6 @@ func (h *TopicHandler) DeleteTopic(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "topic deleted",
+		"message": "Topic deleted",
 	})
 }

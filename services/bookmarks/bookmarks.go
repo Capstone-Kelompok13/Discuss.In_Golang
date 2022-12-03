@@ -100,8 +100,6 @@ func (b *bookmarkServices) GetAllBookmark(token dto.Token) ([]dto.PublicBookmark
 		post, _ := b.IDatabase.GetPostById(int(bookmark.ID))
 		result = append(result, dto.PublicBookmark{
 			Model: bookmark.Model,
-			// UserID: bookmark.UserID,
-			// PostID: bookmark.PostID,
 			User: dto.BookmarkUser{
 				UserID:   bookmark.UserID,
 				Username: post.User.Username,

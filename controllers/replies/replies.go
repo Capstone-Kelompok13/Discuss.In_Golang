@@ -40,7 +40,7 @@ func (h *ReplyHandler) CreateReply(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "reply created",
+		"message": "Reply created",
 	})
 }
 
@@ -58,7 +58,7 @@ func (h *ReplyHandler) GetAllReply(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success",
+		"message": "Success",
 		"data":    replies,
 	})
 }
@@ -89,7 +89,7 @@ func (h *ReplyHandler) UpdateReply(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "reply updated",
+		"message": "Reply updated",
 	})
 }
 
@@ -113,6 +113,6 @@ func (h *ReplyHandler) DeleteReply(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "reply deleted",
+		"message": "Reply deleted",
 	})
 }

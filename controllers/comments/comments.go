@@ -38,7 +38,7 @@ func (h *CommentHandler) CreateComment(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "comment created",
+		"message": "Comment created",
 	})
 
 }
@@ -57,7 +57,7 @@ func (h *CommentHandler) GetAllComment(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success",
+		"message": "Success",
 		"data":    comments,
 	})
 }
@@ -89,7 +89,7 @@ func (h *CommentHandler) UpdateComment(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "comment updated",
+		"message": "Comment updated",
 	})
 
 }
@@ -112,6 +112,6 @@ func (h *CommentHandler) DeleteComment(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "comment deleted",
+		"message": "Comment deleted",
 	})
 }
