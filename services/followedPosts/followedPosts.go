@@ -47,7 +47,7 @@ func (b *followedPostServices) AddFollowedPost(token dto.Token, postID int) erro
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	} else {
-		return echo.NewHTTPError(http.StatusConflict, "post has been followedPosted")
+		return echo.NewHTTPError(http.StatusConflict, "post has been followed")
 	}
 
 	err = b.IDatabase.SaveFollowedPost(newFollowedPost)

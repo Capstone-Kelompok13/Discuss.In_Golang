@@ -33,7 +33,7 @@ func (h *FollowedPostHandler) AddFollowedPost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "FollowedPost added",
+		"message": "Post followed",
 	})
 }
 
@@ -57,7 +57,7 @@ func (h *FollowedPostHandler) DeleteFollowedPost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "FollowedPost deleted",
+		"message": "Post unfollowed",
 	})
 }
 
