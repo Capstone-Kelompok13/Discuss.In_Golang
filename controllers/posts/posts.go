@@ -158,10 +158,12 @@ func (h *PostHandler) DeletePost(c echo.Context) error {
 func (h *PostHandler) GetRecentPost(c echo.Context) error {
 	//check if page exist
 	pageStr := c.QueryParam("page")
+	var page int
 	if pageStr == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "page parameter should not be empty")
+		page = 1
+	} else {
+		page, _ = strconv.Atoi(pageStr)
 	}
-	page, _ := strconv.Atoi(pageStr)
 
 	posts, numberOfPage, err := h.IPostServices.GetRecentPost(page)
 	if err != nil {
