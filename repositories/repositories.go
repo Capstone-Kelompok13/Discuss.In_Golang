@@ -41,6 +41,11 @@ type IDatabase interface {
 	SaveNewLike(like models.Like) error
 	SaveLike(like models.Like) error
 
+	SaveFollowedPost(followedPost models.FollowedPost) error
+	GetFollowedPost(userId int, postId int) (models.FollowedPost, error)
+	DeleteFollowedPost(followedPostId int) error
+	GetAllFollowedPost(userId int) ([]models.FollowedPost, error)
+
 	CountPostLike(postID int) (int, error)
 	CountPostComment(postID int) (int, error)
 	CountPostDislike(postID int) (int, error)
