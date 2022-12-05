@@ -30,7 +30,7 @@ func (b *followedPostServices) AddFollowedPost(token dto.Token, postID int) erro
 	post, err := b.IDatabase.GetPostById(postID)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "Post not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -47,7 +47,7 @@ func (b *followedPostServices) AddFollowedPost(token dto.Token, postID int) erro
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	} else {
-		return echo.NewHTTPError(http.StatusConflict, "post has been followed")
+		return echo.NewHTTPError(http.StatusConflict, "Post has been followed")
 	}
 
 	err = b.IDatabase.SaveFollowedPost(newFollowedPost)
@@ -63,7 +63,7 @@ func (b *followedPostServices) DeleteFollowedPost(token dto.Token, postID int) e
 	post, err := b.IDatabase.GetPostById(postID)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "Post not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -73,7 +73,7 @@ func (b *followedPostServices) DeleteFollowedPost(token dto.Token, postID int) e
 	followedPost, err := b.IDatabase.GetFollowedPost(int(token.ID), int(post.ID))
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "Followed post not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -100,8 +100,6 @@ func (b *followedPostServices) GetAllFollowedPost(token dto.Token) ([]dto.Public
 		post, _ := b.IDatabase.GetPostById(int(followedPost.ID))
 		result = append(result, dto.PublicFollowedPost{
 			Model: followedPost.Model,
-			// UserID: followedPost.UserID,
-			// PostID: followedPost.PostID,
 			User: dto.FollowedPostUser{
 				UserID:   followedPost.UserID,
 				Username: post.User.Username,
