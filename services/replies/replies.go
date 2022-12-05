@@ -67,6 +67,7 @@ func (r *replyServices) GetAllReply(commentId int) ([]dto.PublicReply, error) {
 			User: dto.ReplyUser{
 				UserID:   reply.UserID,
 				Username: reply.User.Username,
+				Photo:    reply.User.Photo,
 			},
 		})
 	}

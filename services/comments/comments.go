@@ -67,6 +67,7 @@ func (c *commentServices) GetAllComments(id int) ([]dto.PublicComment, error) {
 			User: dto.CommentUser{
 				UserID:   (comment.UserID),
 				Username: comment.User.Username,
+				Photo:    comment.User.Photo,
 			},
 		})
 	}

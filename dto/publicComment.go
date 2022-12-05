@@ -12,4 +12,5 @@ type PublicComment struct {
 type CommentUser struct {
 	UserID   int    `json:"userId" form:"userId"`
 	Username string `json:"username" form:"username"`
+	Photo    string `json:"photo" form:"photo"`
 }
