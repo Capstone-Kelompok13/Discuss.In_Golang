@@ -4,7 +4,6 @@ import (
 	"discusiin/dto"
 	"discusiin/models"
 	"discusiin/repositories"
-	"log"
 	"net/http"
 	"time"
 
@@ -32,7 +31,11 @@ func (p *postServices) CreatePost(post models.Post, name string, token dto.Token
 	//find topic
 	topic, err := p.IDatabase.GetTopicByName(name)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		if err.Error() == "record not found" {
+			return echo.NewHTTPError(http.StatusNotFound, "topic not found")
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	//owner
@@ -57,6 +60,9 @@ func (p *postServices) GetPosts(name string, page int) ([]dto.PublicPost, int, e
 	//find topic
 	topic, err := p.IDatabase.GetTopicByName(name)
 	if err != nil {
+		if err.Error() == "record not found" {
+			return nil, 0, echo.NewHTTPError(http.StatusNotFound, "topic not found")
+		}
 		return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -73,11 +79,8 @@ func (p *postServices) GetPosts(name string, page int) ([]dto.PublicPost, int, e
 	var result []dto.PublicPost
 	for _, post := range posts {
 		likeCount, _ := p.IDatabase.CountPostLike(int(post.ID))
-		log.Println("jumlah like: ", likeCount)
 		commentCount, _ := p.IDatabase.CountPostComment(int(post.ID))
-		log.Println("jumlah comment: ", commentCount)
 		dislikeCount, _ := p.IDatabase.CountPostDislike(int(post.ID))
-		log.Println("jumlah dislike: ", dislikeCount)
 
 		result = append(result, dto.PublicPost{
 			Model:     post.Model,
@@ -122,7 +125,11 @@ func (p *postServices) GetPosts(name string, page int) ([]dto.PublicPost, int, e
 func (p *postServices) GetPost(id int) (dto.PublicPost, error) {
 	post, err := p.IDatabase.GetPostById(id)
 	if err != nil {
-		return dto.PublicPost{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		if err.Error() == "record not found" {
+			return dto.PublicPost{}, echo.NewHTTPError(http.StatusNotFound, "post not found")
+		} else {
+			return dto.PublicPost{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	likeCount, _ := p.IDatabase.CountPostLike(int(post.ID))
@@ -159,7 +166,7 @@ func (p *postServices) UpdatePost(newPost models.Post, postID int, token dto.Tok
 	post, err := p.IDatabase.GetPostById(postID)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "post not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -186,7 +193,7 @@ func (p *postServices) DeletePost(id int, token dto.Token) error {
 	post, err := p.IDatabase.GetPostById(id)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "Post not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -200,7 +207,7 @@ func (p *postServices) DeletePost(id int, token dto.Token) error {
 
 	if !user.IsAdmin {
 		if int(token.ID) != post.UserID {
-			return echo.NewHTTPError(http.StatusUnauthorized, "you are not the post owner")
+			return echo.NewHTTPError(http.StatusUnauthorized, "You are not the post owner")
 		}
 	}
 
@@ -221,7 +228,7 @@ func (p *postServices) GetRecentPost(page int) ([]dto.PublicPost, int, error) {
 	posts, err := p.IDatabase.GetRecentPost(page)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return nil, 0, echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return nil, 0, echo.NewHTTPError(http.StatusNotFound, "Post not found")
 		} else {
 			return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}

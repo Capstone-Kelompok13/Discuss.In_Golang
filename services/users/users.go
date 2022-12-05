@@ -18,7 +18,7 @@ func NewUserServices(db repositories.IDatabase) IUserServices {
 
 type IUserServices interface {
 	Register(user models.User) error
-	Login(user models.User) (dto.PublicUser, error)
+	Login(user models.User) (dto.Login, error)
 	GetUsers(token dto.Token, page int) ([]dto.PublicUser, error)
 }
 
@@ -42,7 +42,7 @@ func (s *userServices) Register(user models.User) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, errCheckUsername.Error())
 		}
 	} else {
-		return echo.NewHTTPError(http.StatusConflict, "username has been taken")
+		return echo.NewHTTPError(http.StatusConflict, "Username has been taken")
 	}
 	if !usernameTaken {
 		client.Email = strings.ToLower(user.Email)
@@ -54,7 +54,7 @@ func (s *userServices) Register(user models.User) error {
 				return echo.NewHTTPError(http.StatusInternalServerError, errCheckEmail.Error())
 			}
 		} else {
-			return echo.NewHTTPError(http.StatusConflict, "email has been used in another account")
+			return echo.NewHTTPError(http.StatusConflict, "Email has been used in another account")
 		}
 	}
 	if !emailTaken {
@@ -71,25 +71,25 @@ func (s *userServices) Register(user models.User) error {
 	}
 	return nil
 }
-func (s *userServices) Login(user models.User) (dto.PublicUser, error) {
+func (s *userServices) Login(user models.User) (dto.Login, error) {
 
 	data, err := s.IDatabase.GetUserByEmail(user.Email)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return dto.PublicUser{}, echo.NewHTTPError(http.StatusNotFound, "no account using this email")
+			return dto.Login{}, echo.NewHTTPError(http.StatusNotFound, "No account using this email")
 		}
-		return dto.PublicUser{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return dto.Login{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	var result dto.PublicUser
+	var result dto.Login
 	valid := helper.CheckPasswordHash(user.Password, data.Password)
 	if valid {
 		token, err := middleware.GetToken(data.ID, data.Username)
 		if err != nil {
-			return dto.PublicUser{}, echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+			return dto.Login{}, echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 		}
 
-		result = dto.PublicUser{
+		result = dto.Login{
 			ID:       data.ID,
 			Username: data.Username,
 			Email:    data.Email,
@@ -99,7 +99,7 @@ func (s *userServices) Login(user models.User) (dto.PublicUser, error) {
 			Token:    token,
 		}
 	} else {
-		return dto.PublicUser{}, echo.NewHTTPError(http.StatusForbidden, "password incorrect")
+		return dto.Login{}, echo.NewHTTPError(http.StatusForbidden, "Password incorrect")
 	}
 	return result, nil
 }
@@ -107,14 +107,14 @@ func (s *userServices) GetUsers(token dto.Token, page int) ([]dto.PublicUser, er
 	u, errGetUserByUsername := s.IDatabase.GetUserByUsername(token.Username)
 	if errGetUserByUsername != nil {
 		if errGetUserByUsername.Error() == "record not found" {
-			return nil, echo.NewHTTPError(http.StatusNotFound, errGetUserByUsername.Error())
+			return nil, echo.NewHTTPError(http.StatusNotFound, "Invalid JWT Data")
 		} else {
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, errGetUserByUsername.Error())
 		}
 	}
 
 	if !u.IsAdmin {
-		return nil, echo.NewHTTPError(http.StatusUnauthorized, "admin access only")
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Admin access only")
 	}
 	users, err := s.IDatabase.GetUsers(page)
 	if err != nil {

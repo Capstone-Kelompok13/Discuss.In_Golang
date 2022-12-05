@@ -22,7 +22,11 @@ func (h *LikeHandler) LikePost(c echo.Context) error {
 	}
 
 	//get post id
-	postId, errAtoi := strconv.Atoi(c.Param("post_id"))
+	postIDStr := c.Param("post_id")
+	if postIDStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "post_id parameter should not be emtpy")
+	}
+	postId, errAtoi := strconv.Atoi(postIDStr)
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
@@ -33,7 +37,7 @@ func (h *LikeHandler) LikePost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"message": "success",
+		"message": "Success",
 	})
 }
 func (h *LikeHandler) DislikePost(c echo.Context) error {
@@ -56,6 +60,6 @@ func (h *LikeHandler) DislikePost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"message": "success",
+		"message": "Success",
 	})
 }

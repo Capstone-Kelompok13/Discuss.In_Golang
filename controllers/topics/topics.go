@@ -20,7 +20,7 @@ func (h *TopicHandler) CreateNewTopic(c echo.Context) error {
 
 	errBind := c.Bind(&topic)
 	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
+		return errBind
 	}
 
 	token, errDecodeJWT := helper.DecodeJWT(c)
@@ -44,7 +44,7 @@ func (h *TopicHandler) CreateNewTopic(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "topic created",
+		"message": "Topic created",
 	})
 }
 
@@ -55,25 +55,29 @@ func (h *TopicHandler) GetAllTopics(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success",
+		"message": "Success",
 		"data":    topics,
 	})
 }
 
 func (h *TopicHandler) GetTopic(c echo.Context) error {
 
-	id, errAtoi := strconv.Atoi(c.Param("topic_id"))
+	topic_idStr := c.Param("topic_id")
+	if topic_idStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "topic_id should not be empty")
+	}
+	topic_id, errAtoi := strconv.Atoi(topic_idStr)
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
 
-	topic, err := h.ITopicServices.GetTopic(id)
+	topic, err := h.ITopicServices.GetTopic(topic_id)
 	if err != nil {
 		return err
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success",
+		"message": "Success",
 		"data":    topic,
 	})
 }
@@ -84,7 +88,7 @@ func (h *TopicHandler) UpdateTopicDescription(c echo.Context) error {
 	var newTopic models.Topic
 	errBind := c.Bind(&newTopic)
 	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
+		return errBind
 	}
 
 	token, errDecodeJWT := helper.DecodeJWT(c)
@@ -92,7 +96,11 @@ func (h *TopicHandler) UpdateTopicDescription(c echo.Context) error {
 		return errDecodeJWT
 	}
 
-	id, errAtoi := strconv.Atoi(c.Param("topic_id"))
+	idStr := c.Param("topic_id")
+	if idStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "topic_id should not be empty")
+	}
+	id, errAtoi := strconv.Atoi(idStr)
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
@@ -105,12 +113,16 @@ func (h *TopicHandler) UpdateTopicDescription(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "topic updated",
+		"message": "Topic updated",
 	})
 }
 
 func (h *TopicHandler) DeleteTopic(c echo.Context) error {
-	id, errAtoi := strconv.Atoi(c.Param("topic_id"))
+	idStr := c.Param("topic_id")
+	if idStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "topic_id should not be empty")
+	}
+	id, errAtoi := strconv.Atoi(idStr)
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
@@ -121,6 +133,6 @@ func (h *TopicHandler) DeleteTopic(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "topic deleted",
+		"message": "Topic deleted",
 	})
 }

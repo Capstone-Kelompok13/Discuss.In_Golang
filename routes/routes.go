@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"discusiin/configs"
 	"discusiin/repositories"
+	bService "discusiin/services/bookmarks"
 	cService "discusiin/services/comments"
 	fService "discusiin/services/followedPosts"
 	lService "discusiin/services/likes"
@@ -26,7 +27,8 @@ type Payload struct {
 	cService cService.ICommentServices
 	rService rService.IReplyServices
 	lService lService.ILikeServices
-	fService fService.IFollowedPostServices
+  fService fService.IFollowedPostServices
+	bService bService.IBookmarkServices
 }
 
 func (p *Payload) InitUserService() {
@@ -140,6 +142,22 @@ func (p *Payload) InitLikeService() {
 	p.lService = lService.NewLikeServices(p.repoSql)
 }
 
+// Bookmark -----------------------------------------------------------------------------------------------------------------
+func (p *Payload) GetBookmarkServices() bService.IBookmarkServices {
+	if p.bService == nil {
+		p.InitBookmarkService()
+	}
+
+	return p.bService
+}
+
+func (p *Payload) InitBookmarkService() {
+  if p.repoSql == nil {
+		p.InitRepoMysql()
+	}
+  
+	p.bService = bService.NewBookmarkServices(p.repoSql)
+}
 // FollowedPost -----------------------------------------------------------------------------------------------------------------
 func (p *Payload) GetFollowedPostServices() fService.IFollowedPostServices {
 	if p.fService == nil {
@@ -150,9 +168,10 @@ func (p *Payload) GetFollowedPostServices() fService.IFollowedPostServices {
 }
 
 func (p *Payload) InitFollowedPostService() {
-	if p.repoSql == nil {
+  	if p.repoSql == nil {
 		p.InitRepoMysql()
 	}
-
-	p.fService = fService.NewFollowedPostServices(p.repoSql)
+  
+  p.fService = fService.NewFollowedPostServices(p.repoSql)
 }
+

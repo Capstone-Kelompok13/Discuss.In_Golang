@@ -20,7 +20,7 @@ func (h *UserHandler) Register(c echo.Context) error {
 
 	errBind := c.Bind(&u)
 	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
+		return errBind
 	}
 
 	// isEmailKosong?
@@ -51,7 +51,7 @@ func (h *UserHandler) Register(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": "created",
+		"message": "Created",
 	})
 }
 
@@ -60,7 +60,7 @@ func (h *UserHandler) Login(c echo.Context) error {
 	var u models.User
 	err := c.Bind(&u)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return err
 	}
 
 	if u.Email == "" {
@@ -81,7 +81,7 @@ func (h *UserHandler) Login(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success",
+		"message": "Success",
 		"data":    result,
 	})
 }
@@ -103,7 +103,7 @@ func (h *UserHandler) GetUsers(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"message": "success",
+		"message": "Success",
 		"data":    result,
 	})
 }

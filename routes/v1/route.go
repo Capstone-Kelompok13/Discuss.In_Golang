@@ -4,6 +4,7 @@ import (
 	// "discusiin/controllers/topics"
 
 	"discusiin/configs"
+	"discusiin/controllers/bookmarks"
 	"discusiin/controllers/comments"
 	"discusiin/controllers/followedPosts"
 	"discusiin/controllers/likes"
@@ -24,6 +25,7 @@ import (
 func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	e := echo.New()
 
+	e.Pre(middleware.RemoveTrailingSlash())
 	mid.LogMiddleware(e)
 	cors := middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
@@ -58,9 +60,13 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 		ILikeServices: payload.GetLikeServices(),
 	}
 
-	fHandler := followedPosts.FollowedPostHandler{
+  fHandler := followedPosts.FollowedPostHandler{
 		IFollowedPostServices: payload.GetFollowedPostServices(),
-	}
+  }    
+	bHandler := bookmarks.BookmarkHandler{
+		IBookmarkServices: payload.GetBookmarkServices(),
+  }
+
 
 	api := e.Group("/api")
 	v1 := api.Group("/v1")
@@ -88,15 +94,13 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	posts.PUT("/edit/:post_id", pHandler.EditPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	posts.DELETE("/delete/:post_id", pHandler.DeletePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
-	//endpoint followedPost
+
+  	//endpoint followedPost
 	followedPosts := posts.Group("/followed-posts")
 	followedPosts.POST("/:post_id", fHandler.AddFollowedPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	followedPosts.DELETE("/:post_id", fHandler.DeleteFollowedPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	followedPosts.GET("/all", fHandler.GetAllFollowedPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
-	//endpoint Like
-	posts.PUT("/like/:post_id", lHandler.LikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
-	posts.PUT("/dislike/:post_id", lHandler.DislikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	//endpoints comments
 	comments := posts.Group("/comments")
 	comments.GET("/:post_id", cHandler.GetAllComment)
@@ -110,6 +114,16 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	replys.POST("/create/:comment_id", rHandler.CreateReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	replys.PUT("/edit/:reply_id", rHandler.UpdateReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	replys.DELETE("/delete/:reply_id", rHandler.DeleteReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+
+	//endpoint Like
+	posts.PUT("/like/:post_id", lHandler.LikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	posts.PUT("/dislike/:post_id", lHandler.DislikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+
+	//endpoint bookmark
+	bookmarks := posts.Group("/bookmarks")
+	bookmarks.POST("/:post_id", bHandler.AddBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	bookmarks.DELETE("/:post_id", bHandler.DeleteBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	bookmarks.GET("/all", bHandler.GetAllBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
 	return e, trace
 }
