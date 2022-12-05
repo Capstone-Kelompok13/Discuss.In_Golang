@@ -18,11 +18,21 @@ func (h *PostHandler) CreateNewPost(c echo.Context) error {
 	var p models.Post
 	errBind := c.Bind(&p)
 	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
+		return errBind
 	}
 
 	url_param_value := c.Param("topic_name")
+	if url_param_value == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "topic_name should not be empty")
+	}
 	topicName := helper.URLDecodeReformat(url_param_value)
+
+	if p.Title == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "post title should not be empty")
+	}
+	if p.Body == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "post body should not be empty")
+	}
 
 	//get logged userId
 	token, errDecodeJWT := helper.DecodeJWT(c)
@@ -32,26 +42,26 @@ func (h *PostHandler) CreateNewPost(c echo.Context) error {
 
 	err := h.IPostServices.CreatePost(p, topicName, token)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": err.Error(),
-		})
+		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"message": "Post created",
 	})
 }
 
 func (h *PostHandler) GetAllPost(c echo.Context) error {
-	url_param_value := c.Param("topic_name")
-	topicName := helper.URLDecodeReformat(url_param_value)
-	if url_param_value == "" {
+	if c.Param("topic_name") == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "topic name should not be empty")
 	}
+	topicName := helper.URLDecodeReformat(c.Param("topic_name"))
 	if topicName == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "topic name should not be empty")
 	}
 	//check if page exist
+	if c.QueryParam("page") == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "page query parameter should not be empty")
+	}
 	page, errAtoi := strconv.Atoi(c.QueryParam("page"))
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
@@ -62,7 +72,7 @@ func (h *PostHandler) GetAllPost(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, echo.Map{
 		"message":        "Success",
 		"data":           posts,
 		"number_of_page": numberOfPage,
@@ -72,6 +82,9 @@ func (h *PostHandler) GetAllPost(c echo.Context) error {
 
 func (h *PostHandler) GetPost(c echo.Context) error {
 
+	if c.Param("post_id") == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "post_id parameter should not be empty")
+	}
 	id, errAtoi := strconv.Atoi(c.Param("post_id"))
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
@@ -82,7 +95,7 @@ func (h *PostHandler) GetPost(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, echo.Map{
 		"message": "Success",
 		"data":    p,
 	})
@@ -92,7 +105,7 @@ func (h *PostHandler) EditPost(c echo.Context) error {
 	var newPost models.Post
 	errBind := c.Bind(&newPost)
 	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
+		return errBind
 	}
 
 	//get user id from logged user
@@ -100,7 +113,9 @@ func (h *PostHandler) EditPost(c echo.Context) error {
 	if errDecodeJWT != nil {
 		return errDecodeJWT
 	}
-
+	if c.Param("post_id") == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "post_id parameter should not be empty")
+	}
 	id, errAtoi := strconv.Atoi(c.Param("post_id"))
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
@@ -111,21 +126,21 @@ func (h *PostHandler) EditPost(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, echo.Map{
 		"message": "Post updated",
 	})
 }
 
 func (h *PostHandler) DeletePost(c echo.Context) error {
-	var newPost models.Post
-	c.Bind(&newPost)
 
 	//get user id from logged user
 	token, errDecodeJWT := helper.DecodeJWT(c)
 	if errDecodeJWT != nil {
 		return errDecodeJWT
 	}
-
+	if c.Param("post_id") == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "post_id parameter should not be empty")
+	}
 	postID, errAtoi := strconv.Atoi(c.Param("post_id"))
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
@@ -135,14 +150,18 @@ func (h *PostHandler) DeletePost(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, echo.Map{
 		"message": "Post deleted",
 	})
 }
 
 func (h *PostHandler) GetRecentPost(c echo.Context) error {
 	//check if page exist
-	page, _ := strconv.Atoi(c.QueryParam("page"))
+	pageStr := c.QueryParam("page")
+	if pageStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "page parameter should not be empty")
+	}
+	page, _ := strconv.Atoi(pageStr)
 
 	posts, numberOfPage, err := h.IPostServices.GetRecentPost(page)
 	if err != nil {

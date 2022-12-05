@@ -193,7 +193,7 @@ func (p *postServices) DeletePost(id int, token dto.Token) error {
 	post, err := p.IDatabase.GetPostById(id)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, "post not found")
+			return echo.NewHTTPError(http.StatusNotFound, "Post not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -207,7 +207,7 @@ func (p *postServices) DeletePost(id int, token dto.Token) error {
 
 	if !user.IsAdmin {
 		if int(token.ID) != post.UserID {
-			return echo.NewHTTPError(http.StatusUnauthorized, "you are not the post owner")
+			return echo.NewHTTPError(http.StatusUnauthorized, "You are not the post owner")
 		}
 	}
 
@@ -228,7 +228,7 @@ func (p *postServices) GetRecentPost(page int) ([]dto.PublicPost, int, error) {
 	posts, err := p.IDatabase.GetRecentPost(page)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return nil, 0, echo.NewHTTPError(http.StatusNotFound, "post not found")
+			return nil, 0, echo.NewHTTPError(http.StatusNotFound, "Post not found")
 		} else {
 			return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}

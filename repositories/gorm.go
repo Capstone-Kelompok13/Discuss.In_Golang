@@ -138,7 +138,13 @@ func (db GormSql) GetAllPostByTopic(id int, page int) ([]models.Post, error) {
 	var posts []models.Post
 
 	//find topic id
-	err := db.DB.Where("topic_id = ?", id).Order("created_at DESC").Preload("User").Preload("Topic").Offset((page - 1) * 20).Limit(20).Find(&posts).Error
+	err := db.DB.Where("topic_id = ?", id).
+		Order("created_at DESC").
+		Preload("User").
+		Preload("Topic").
+		Offset((page - 1) * 20).
+		Limit(20).
+		Find(&posts).Error
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +155,10 @@ func (db GormSql) GetAllPostByTopic(id int, page int) ([]models.Post, error) {
 func (db GormSql) GetPostById(id int) (models.Post, error) {
 	var post models.Post
 
-	err := db.DB.Where("id = ?", id).Preload("User").Preload("Topic").First(&post).Error
+	err := db.DB.Where("id = ?", id).
+		Preload("User").
+		Preload("Topic").
+		First(&post).Error
 	if err != nil {
 		return models.Post{}, err
 	}
@@ -178,7 +187,7 @@ func (db GormSql) DeletePost(id int) error {
 
 func (db GormSql) GetPostByIdWithAll(id int) (models.Post, error) {
 	var post models.Post
-	err := db.DB.Model(&models.Post{}).Where("id = ?", id).Preload("Comments").Find(&post).Error
+	err := db.DB.Model(&models.Post{}).Where("id = ?", id).Preload("Comments").First(&post).Error
 	if err != nil {
 		return models.Post{}, err
 	}
@@ -256,9 +265,9 @@ func (db GormSql) GetAllReplyByComment(commentId int) ([]models.Reply, error) {
 	return replys, nil
 }
 
-func (db GormSql) GetReplyById(re int) (models.Reply, error) {
+func (db GormSql) GetReplyById(id int) (models.Reply, error) {
 	var reply models.Reply
-	err := db.DB.Where("id = ?", re).Find(&reply).Error
+	err := db.DB.Where("id = ?", id).First(&reply).Error
 	if err != nil {
 		return models.Reply{}, err
 	}
@@ -360,7 +369,7 @@ func (db GormSql) GetAllBookmark(userId int) ([]models.Bookmark, error) {
 func (db GormSql) CountPostLike(postID int) (int, error) {
 	var postLike int64
 
-	err := db.DB.Model(&models.Like{}).Where("post_id = ? AND is_like = 1", postID).Count(&postLike).Error
+	err := db.DB.Table("likes").Where("post_id = ? AND is_like = 1", postID).Count(&postLike).Error
 	if err != nil {
 		return 0, err
 	}
@@ -368,36 +377,38 @@ func (db GormSql) CountPostLike(postID int) (int, error) {
 	return int(postLike), nil
 }
 func (db GormSql) CountPostDislike(postID int) (int, error) {
-	result := db.DB.Where("post_id = ? AND is_dislike = true", postID).Find(&models.Like{})
-	if result.Error != nil {
-		return 0, result.Error
+	var postDislike int64
+	err := db.DB.Table("likes").Where("post_id = ? AND is_dislike = 1", postID).Count(&postDislike).Error
+	if err != nil {
+		return 0, err
 	}
-	return int(result.RowsAffected), nil
+	return int(postDislike), nil
 }
 func (db GormSql) CountPostComment(postID int) (int, error) {
-	result := db.DB.Where("post_id = ?", postID).Find(&models.Comment{})
-	if result.Error != nil {
-		return 0, result.Error
+	var commentCount int64
+	err := db.DB.Table("comments").Where("post_id = ?", postID).Count(&commentCount).Error
+	if err != nil {
+		return 0, err
 	}
-	return int(result.RowsAffected), nil
+	return int(commentCount), nil
 }
 func (db GormSql) CountAllPost() (int, error) {
-	var pageNumber int64
+	var numberOfPost int64
 
-	err := db.DB.Model(&models.Post{}).Count(&pageNumber).Error
+	err := db.DB.Table("posts").Count(&numberOfPost).Error
 	if err != nil {
 		return 0, err
 	}
 
-	return int(pageNumber), nil
+	return int(numberOfPost), nil
 }
 func (db GormSql) CountPostByTopicID(topicId int) (int, error) {
-	var countPost int64
+	var postCount int64
 
-	err := db.DB.Model(&models.Post{}).Where("topic_id = ?", topicId).Count(&countPost).Error
+	err := db.DB.Table("posts").Where("topic_id = ?", topicId).Count(&postCount).Error
 	if err != nil {
 		return 0, err
 	}
 
-	return int(countPost), nil
+	return int(postCount), nil
 }

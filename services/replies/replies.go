@@ -29,7 +29,7 @@ func (r *replyServices) CreateReply(reply models.Reply, co int, token dto.Token)
 	comment, err := r.IDatabase.GetCommentById(co)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "Comment not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -52,7 +52,7 @@ func (r *replyServices) GetAllReply(commentId int) ([]dto.PublicReply, error) {
 	replies, err := r.IDatabase.GetAllReplyByComment(commentId)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return nil, echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return nil, echo.NewHTTPError(http.StatusNotFound, "Comment not found")
 		} else {
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -62,10 +62,12 @@ func (r *replyServices) GetAllReply(commentId int) ([]dto.PublicReply, error) {
 	for _, reply := range replies {
 		result = append(result, dto.PublicReply{
 			Model:     reply.Model,
-			UserID:    reply.UserID,
 			CommentID: reply.CommentID,
 			Body:      reply.Body,
-			Username:  reply.User.Username,
+			User: dto.ReplyUser{
+				UserID:   reply.UserID,
+				Username: reply.User.Username,
+			},
 		})
 	}
 
@@ -77,7 +79,7 @@ func (r *replyServices) UpdateReply(newReply models.Reply, replyId int, token dt
 	reply, err := r.IDatabase.GetReplyById(replyId)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "Reply not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -85,7 +87,7 @@ func (r *replyServices) UpdateReply(newReply models.Reply, replyId int, token dt
 
 	//check if user are correct
 	if reply.UserID != int(token.ID) {
-		return echo.NewHTTPError(http.StatusUnauthorized, "you are not the reply owner")
+		return echo.NewHTTPError(http.StatusUnauthorized, "You are not the reply owner")
 	}
 
 	//update reply field
@@ -106,7 +108,7 @@ func (r *replyServices) DeleteReply(replyId int, token dto.Token) error {
 	reply, err := r.IDatabase.GetReplyById(replyId)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "Reply not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -114,7 +116,7 @@ func (r *replyServices) DeleteReply(replyId int, token dto.Token) error {
 
 	//check if user are correct
 	if reply.UserID != int(token.ID) {
-		return echo.NewHTTPError(http.StatusUnauthorized, "you are not the reply owner")
+		return echo.NewHTTPError(http.StatusUnauthorized, "You are not the reply owner")
 	}
 
 	//delete reply

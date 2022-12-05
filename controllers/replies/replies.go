@@ -19,7 +19,10 @@ func (h *ReplyHandler) CreateReply(c echo.Context) error {
 	// c.Bind(&reply)
 	errBind := c.Bind(&reply)
 	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
+		return errBind
+	}
+	if reply.Body == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Reply should not be empty")
 	}
 
 	//get logged userId
@@ -29,6 +32,9 @@ func (h *ReplyHandler) CreateReply(c echo.Context) error {
 	}
 
 	//get comment id
+	if c.Param("comment_id") == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "comment_id should not be empty")
+	}
 	commentId, errAtoi := strconv.Atoi(c.Param("comment_id"))
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
@@ -39,13 +45,16 @@ func (h *ReplyHandler) CreateReply(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"message": "Reply created",
 	})
 }
 
 func (h *ReplyHandler) GetAllReply(c echo.Context) error {
 	//get comment id
+	if c.Param("comment_id") == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "comment_id should not be empty")
+	}
 	commentId, errAtoi := strconv.Atoi(c.Param("comment_id"))
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
@@ -57,7 +66,7 @@ func (h *ReplyHandler) GetAllReply(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, echo.Map{
 		"message": "Success",
 		"data":    replies,
 	})
@@ -67,7 +76,7 @@ func (h *ReplyHandler) UpdateReply(c echo.Context) error {
 	var newReply models.Reply
 	errBind := c.Bind(&newReply)
 	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
+		return errBind
 	}
 
 	//get logged userId
@@ -77,6 +86,9 @@ func (h *ReplyHandler) UpdateReply(c echo.Context) error {
 	}
 
 	//get reply id
+	if c.Param("reply_id") == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "reply_id should not be empty")
+	}
 	replyId, errAtoi := strconv.Atoi(c.Param("reply_id"))
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
@@ -88,7 +100,7 @@ func (h *ReplyHandler) UpdateReply(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, echo.Map{
 		"message": "Reply updated",
 	})
 }
@@ -101,6 +113,9 @@ func (h *ReplyHandler) DeleteReply(c echo.Context) error {
 	}
 
 	//get reply id
+	if c.Param("reply_id") == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "reply_id should not be empty")
+	}
 	replyId, errAtoi := strconv.Atoi(c.Param("reply_id"))
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
@@ -112,7 +127,7 @@ func (h *ReplyHandler) DeleteReply(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, echo.Map{
 		"message": "Reply deleted",
 	})
 }

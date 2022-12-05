@@ -37,7 +37,7 @@ func (h *CommentHandler) CreateComment(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"message": "Comment created",
 	})
 
@@ -46,6 +46,9 @@ func (h *CommentHandler) CreateComment(c echo.Context) error {
 func (h *CommentHandler) GetAllComment(c echo.Context) error {
 
 	//get post id
+	if c.Param("post_id") == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "post_id should not be empty")
+	}
 	postID, errAtoi := strconv.Atoi(c.Param("post_id"))
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
@@ -56,7 +59,7 @@ func (h *CommentHandler) GetAllComment(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, echo.Map{
 		"message": "Success",
 		"data":    comments,
 	})
@@ -66,7 +69,10 @@ func (h *CommentHandler) UpdateComment(c echo.Context) error {
 	var comment models.Comment
 	errBind := c.Bind(&comment)
 	if errBind != nil {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, errBind.Error())
+		return errBind
+	}
+	if comment.Body == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Comment should not be empty")
 	}
 
 	//get logged userId
@@ -76,6 +82,9 @@ func (h *CommentHandler) UpdateComment(c echo.Context) error {
 	}
 
 	//check if user who eligible untuk param comment
+	if c.Param("comment_id") == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "comment_id should not be empty")
+	}
 	commentID, errAtoi := strconv.Atoi(c.Param("comment_id"))
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
@@ -88,7 +97,7 @@ func (h *CommentHandler) UpdateComment(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, echo.Map{
 		"message": "Comment updated",
 	})
 
@@ -102,6 +111,9 @@ func (h *CommentHandler) DeleteComment(c echo.Context) error {
 	}
 
 	//check if user who eligible
+	if c.Param("comment_id") == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "comment_id should not be empty")
+	}
 	commentID, errAtoi := strconv.Atoi(c.Param("comment_id"))
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
@@ -111,7 +123,7 @@ func (h *CommentHandler) DeleteComment(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, echo.Map{
 		"message": "Comment deleted",
 	})
 }

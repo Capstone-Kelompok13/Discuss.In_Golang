@@ -31,7 +31,7 @@ func (t *topicServices) GetTopics() ([]models.Topic, error) {
 	topics, err := t.IDatabase.GetAllTopics()
 	if err != nil {
 		if err.Error() == "record not found" {
-			return nil, echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return nil, echo.NewHTTPError(http.StatusNotFound, "Topic not found")
 		} else {
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -45,13 +45,13 @@ func (t *topicServices) CreateTopic(topic models.Topic, token dto.Token) error {
 	user, errGetUser := t.IDatabase.GetUserByUsername(token.Username)
 	if errGetUser != nil {
 		if errGetUser.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, errGetUser.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "User not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, errGetUser.Error())
 		}
 	}
 	if !user.IsAdmin {
-		return echo.NewHTTPError(http.StatusUnauthorized, "admin access only")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Admin access only")
 	}
 
 	// isExist?
@@ -66,7 +66,7 @@ func (t *topicServices) CreateTopic(topic models.Topic, token dto.Token) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, errGetTopicByName.Error())
 		}
 	} else {
-		return echo.NewHTTPError(http.StatusConflict, "topic already exist")
+		return echo.NewHTTPError(http.StatusConflict, "Topic already exist")
 	}
 
 	return nil
@@ -76,7 +76,7 @@ func (t *topicServices) GetTopic(id int) (models.Topic, error) {
 	topic, err := t.IDatabase.GetTopicByID(id)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return models.Topic{}, echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return models.Topic{}, echo.NewHTTPError(http.StatusNotFound, "Topic not found")
 		} else {
 			return models.Topic{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -89,7 +89,7 @@ func (t *topicServices) SaveTopic(topic models.Topic, token dto.Token) error {
 	user, errGetUser := t.IDatabase.GetUserByUsername(token.Username)
 	if errGetUser != nil {
 		if errGetUser.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, errGetUser.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "user not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, errGetUser.Error())
 		}
@@ -110,7 +110,7 @@ func (t *topicServices) RemoveTopic(id int) error {
 	err := t.IDatabase.RemoveTopic(id)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "Topic not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -124,19 +124,19 @@ func (t *topicServices) UpdateTopicDescription(newTopic models.Topic, token dto.
 	user, errGetUser := t.IDatabase.GetUserByUsername(token.Username)
 	if errGetUser != nil {
 		if errGetUser.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, errGetUser.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "User not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, errGetUser.Error())
 		}
 	}
 	if !user.IsAdmin {
-		return echo.NewHTTPError(http.StatusUnauthorized, "admin access only")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Admin access only")
 	}
 
 	topic, errGetTopicByID := t.IDatabase.GetTopicByID(int(newTopic.ID))
 	if errGetTopicByID != nil {
 		if errGetTopicByID.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, errGetTopicByID.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "Topic not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, errGetTopicByID.Error())
 		}

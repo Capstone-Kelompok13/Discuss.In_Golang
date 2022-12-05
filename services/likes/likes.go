@@ -25,6 +25,16 @@ type likeServices struct {
 
 func (l *likeServices) LikePost(token dto.Token, postId int) error {
 	var like models.Like
+	//cek jika post ada
+	_, err := l.IDatabase.GetPostById(postId)
+	if err != nil {
+		if err.Error() == "record not found" {
+			return echo.NewHTTPError(http.StatusNotFound, "Post not found")
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	}
+
 	//cek jika like ada
 	oldLike, err := l.IDatabase.GetLikeByUserAndPostId(int(token.ID), postId)
 	if err != nil {
@@ -62,7 +72,15 @@ func (l *likeServices) LikePost(token dto.Token, postId int) error {
 func (l *likeServices) DislikePost(token dto.Token, postId int) error {
 
 	var like models.Like
-
+	// cek jika post ada
+	_, err := l.IDatabase.GetPostById(postId)
+	if err != nil {
+		if err.Error() == "record not found" {
+			return echo.NewHTTPError(http.StatusNotFound, "Post not found")
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	}
 	//cek jika like ada
 	oldLike, err := l.IDatabase.GetLikeByUserAndPostId(int(token.ID), postId)
 	if err != nil {

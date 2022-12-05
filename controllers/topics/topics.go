@@ -62,12 +62,16 @@ func (h *TopicHandler) GetAllTopics(c echo.Context) error {
 
 func (h *TopicHandler) GetTopic(c echo.Context) error {
 
-	id, errAtoi := strconv.Atoi(c.Param("topic_id"))
+	topic_idStr := c.Param("topic_id")
+	if topic_idStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "topic_id should not be empty")
+	}
+	topic_id, errAtoi := strconv.Atoi(topic_idStr)
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
 
-	topic, err := h.ITopicServices.GetTopic(id)
+	topic, err := h.ITopicServices.GetTopic(topic_id)
 	if err != nil {
 		return err
 	}
@@ -92,7 +96,11 @@ func (h *TopicHandler) UpdateTopicDescription(c echo.Context) error {
 		return errDecodeJWT
 	}
 
-	id, errAtoi := strconv.Atoi(c.Param("topic_id"))
+	idStr := c.Param("topic_id")
+	if idStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "topic_id should not be empty")
+	}
+	id, errAtoi := strconv.Atoi(idStr)
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}
@@ -110,7 +118,11 @@ func (h *TopicHandler) UpdateTopicDescription(c echo.Context) error {
 }
 
 func (h *TopicHandler) DeleteTopic(c echo.Context) error {
-	id, errAtoi := strconv.Atoi(c.Param("topic_id"))
+	idStr := c.Param("topic_id")
+	if idStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "topic_id should not be empty")
+	}
+	id, errAtoi := strconv.Atoi(idStr)
 	if errAtoi != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
 	}

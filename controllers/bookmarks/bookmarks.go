@@ -32,7 +32,7 @@ func (h *BookmarkHandler) AddBookmark(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"message": "Bookmark added",
 	})
 }
@@ -56,7 +56,7 @@ func (h *BookmarkHandler) DeleteBookmark(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"message": "Bookmark deleted",
 	})
 }
@@ -74,7 +74,7 @@ func (h *BookmarkHandler) GetAllBookmark(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"message":       "Success",
 		"data_bookmark": bookmarks,
 	})

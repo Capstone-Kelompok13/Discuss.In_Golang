@@ -30,7 +30,7 @@ func (b *bookmarkServices) AddBookmark(token dto.Token, postID int) error {
 	post, err := b.IDatabase.GetPostById(postID)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "Post not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -47,7 +47,7 @@ func (b *bookmarkServices) AddBookmark(token dto.Token, postID int) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	} else {
-		return echo.NewHTTPError(http.StatusConflict, "post has been bookmarked")
+		return echo.NewHTTPError(http.StatusConflict, "Post has been bookmarked")
 	}
 
 	err = b.IDatabase.SaveBookmark(newBookmark)
@@ -63,7 +63,7 @@ func (b *bookmarkServices) DeleteBookmark(token dto.Token, postID int) error {
 	post, err := b.IDatabase.GetPostById(postID)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, "Post not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
