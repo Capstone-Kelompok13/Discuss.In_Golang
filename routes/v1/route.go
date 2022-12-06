@@ -27,6 +27,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 
 	e.Pre(middleware.RemoveTrailingSlash())
 	mid.LogMiddleware(e)
+	e.Use(middleware.Recover())
 	cors := middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodPost},

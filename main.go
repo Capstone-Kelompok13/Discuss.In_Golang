@@ -21,8 +21,5 @@ func main() {
 	e, trace := v1.InitRoute(routePayload)
 	defer trace.Close()
 
-	err := e.Start(configs.Cfg.APIPort)
-	if err != nil {
-		panic(err)
-	}
+	e.Logger.Fatal(e.Start(configs.Cfg.APIPort))
 }
