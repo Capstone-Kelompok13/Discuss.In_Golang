@@ -28,7 +28,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	e.Pre(middleware.RemoveTrailingSlash())
 	mid.LogMiddleware(e)
 	e.Use(middleware.Recover())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	cors := middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodPost},
 		AllowHeaders: []string{
@@ -41,7 +41,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 			echo.HeaderAuthorization,
 			"*",
 		},
-	}))
+	})
 
 	trace := jaegertracing.New(e, nil)
 
@@ -81,12 +81,14 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 
 	//endpoints users
 	users := v1.Group("/users")
+	users.Use(cors)
 	users.POST("/register", uHandler.Register)
 	users.POST("/login", uHandler.Login)
 	users.GET("", uHandler.GetUsers)
 
 	//endpoints topics
 	topics := v1.Group("/topics")
+	topics.Use(cors)
 	topics.POST("/create", tHandler.CreateNewTopic, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	topics.PUT("/edit_description/:topic_id", tHandler.UpdateTopicDescription, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	topics.GET("", tHandler.GetAllTopics)
@@ -95,6 +97,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 
 	//endpoints posts
 	posts := v1.Group("/posts")
+	posts.Use(cors)
 	posts.POST("/create/:topic_name", pHandler.CreateNewPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	posts.GET("/all/:topic_name", pHandler.GetAllPost)
 	posts.GET("/recents", pHandler.GetRecentPost)
@@ -104,23 +107,26 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 
 	//endpoint followedPost
 	followedPosts := posts.Group("/followed-posts")
+	followedPosts.Use(cors)
 	followedPosts.POST("/:post_id", fHandler.AddFollowedPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	followedPosts.DELETE("/:post_id", fHandler.DeleteFollowedPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	followedPosts.GET("/all", fHandler.GetAllFollowedPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
 	//endpoints comments
 	comments := posts.Group("/comments")
+	comments.Use(cors)
 	comments.GET("/:post_id", cHandler.GetAllComment)
 	comments.POST("/create/:post_id", cHandler.CreateComment, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	comments.PUT("/edit/:comment_id", cHandler.UpdateComment, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	comments.DELETE("/delete/:comment_id", cHandler.DeleteComment, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
 	//endpoints reply
-	replys := comments.Group("/replies")
-	replys.GET("/:comment_id", rHandler.GetAllReply)
-	replys.POST("/create/:comment_id", rHandler.CreateReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
-	replys.PUT("/edit/:reply_id", rHandler.UpdateReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
-	replys.DELETE("/delete/:reply_id", rHandler.DeleteReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	replies := comments.Group("/replies")
+	replies.Use(cors)
+	replies.GET("/:comment_id", rHandler.GetAllReply)
+	replies.POST("/create/:comment_id", rHandler.CreateReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	replies.PUT("/edit/:reply_id", rHandler.UpdateReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
+	replies.DELETE("/delete/:reply_id", rHandler.DeleteReply, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
 	//endpoint Like
 	posts.PUT("/like/:post_id", lHandler.LikePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
@@ -128,6 +134,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 
 	//endpoint bookmark
 	bookmarks := posts.Group("/bookmarks")
+	bookmarks.Use(cors)
 	bookmarks.POST("/:post_id", bHandler.AddBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	bookmarks.DELETE("/:post_id", bHandler.DeleteBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	bookmarks.GET("/all", bHandler.GetAllBookmark, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
