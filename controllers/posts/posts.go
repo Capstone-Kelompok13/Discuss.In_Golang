@@ -59,12 +59,15 @@ func (h *PostHandler) GetAllPost(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "topic name should not be empty")
 	}
 	//check if page exist
+	var page int
 	if c.QueryParam("page") == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "page query parameter should not be empty")
-	}
-	page, errAtoi := strconv.Atoi(c.QueryParam("page"))
-	if errAtoi != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
+		page = 1
+	} else {
+		var errAtoi error
+		page, errAtoi = strconv.Atoi(c.QueryParam("page"))
+		if errAtoi != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
+		}
 	}
 
 	posts, numberOfPage, err := h.IPostServices.GetPosts(topicName, page)
@@ -113,15 +116,19 @@ func (h *PostHandler) EditPost(c echo.Context) error {
 	if errDecodeJWT != nil {
 		return errDecodeJWT
 	}
+
+	var postID int
 	if c.Param("post_id") == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "post_id parameter should not be empty")
-	}
-	id, errAtoi := strconv.Atoi(c.Param("post_id"))
-	if errAtoi != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
+		postID = 1
+	} else {
+		var errAtoi error
+		postID, errAtoi = strconv.Atoi(c.Param("post_id"))
+		if errAtoi != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, errAtoi.Error())
+		}
 	}
 
-	err := h.IPostServices.UpdatePost(newPost, id, token)
+	err := h.IPostServices.UpdatePost(newPost, postID, token)
 	if err != nil {
 		return err
 	}
@@ -162,7 +169,11 @@ func (h *PostHandler) GetRecentPost(c echo.Context) error {
 	if pageStr == "" {
 		page = 1
 	} else {
-		page, _ = strconv.Atoi(pageStr)
+		var err error
+		page, err = strconv.Atoi(pageStr)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
 	}
 
 	posts, numberOfPage, err := h.IPostServices.GetRecentPost(page)

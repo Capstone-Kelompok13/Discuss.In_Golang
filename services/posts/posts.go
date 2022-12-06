@@ -166,14 +166,14 @@ func (p *postServices) UpdatePost(newPost models.Post, postID int, token dto.Tok
 	post, err := p.IDatabase.GetPostById(postID)
 	if err != nil {
 		if err.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, "post not found")
+			return echo.NewHTTPError(http.StatusNotFound, "Post not found")
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
 
 	if int(token.ID) != post.UserID {
-		return echo.NewHTTPError(http.StatusUnauthorized, "you are not the post owner")
+		return echo.NewHTTPError(http.StatusUnauthorized, "You are not the post owner")
 	}
 
 	//update post body
