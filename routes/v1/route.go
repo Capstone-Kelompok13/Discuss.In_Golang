@@ -29,10 +29,10 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	mid.LogMiddleware(e)
 	cors := middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
-		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodPost, http.MethodOptions},
-		AllowHeaders: []string{"Content-Type", "X-CSRF-Token"},
+		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodPost},
+		AllowHeaders: []string{"*"},
 	})
-	e.Pre(cors)
+	e.Use(cors)
 
 	trace := jaegertracing.New(e, nil)
 
@@ -60,13 +60,12 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 		ILikeServices: payload.GetLikeServices(),
 	}
 
-  fHandler := followedPosts.FollowedPostHandler{
+	fHandler := followedPosts.FollowedPostHandler{
 		IFollowedPostServices: payload.GetFollowedPostServices(),
-  }    
+	}
 	bHandler := bookmarks.BookmarkHandler{
 		IBookmarkServices: payload.GetBookmarkServices(),
-  }
-
+	}
 
 	api := e.Group("/api")
 	v1 := api.Group("/v1")
@@ -94,8 +93,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	posts.PUT("/edit/:post_id", pHandler.EditPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	posts.DELETE("/delete/:post_id", pHandler.DeletePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 
-
-  	//endpoint followedPost
+	//endpoint followedPost
 	followedPosts := posts.Group("/followed-posts")
 	followedPosts.POST("/:post_id", fHandler.AddFollowedPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	followedPosts.DELETE("/:post_id", fHandler.DeleteFollowedPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
