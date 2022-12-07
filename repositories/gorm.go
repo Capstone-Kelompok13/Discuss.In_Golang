@@ -52,6 +52,14 @@ func (db GormSql) GetUsers(page int) ([]models.User, error) {
 	}
 	return users, nil
 }
+func (db GormSql) GetProfile(id int) (models.User, error) {
+	var user models.User
+	err := db.DB.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return models.User{}, err
+	}
+	return user, nil
+}
 
 // Topic -------------------------------------------------------------------------------------------------------------------------------------------------
 func (db GormSql) GetAllTopics() ([]models.Topic, error) {

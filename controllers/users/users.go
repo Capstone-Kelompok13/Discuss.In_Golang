@@ -107,3 +107,20 @@ func (h *UserHandler) GetUsers(c echo.Context) error {
 		"data":    result,
 	})
 }
+
+func (h *UserHandler) GetProfile(c echo.Context) error {
+	token, errDecodeJWT := helper.DecodeJWT(c)
+	if errDecodeJWT != nil {
+		return errDecodeJWT
+	}
+
+	result, err := h.IUserServices.GetProfile(token)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "Success",
+		"data":    result,
+	})
+}
