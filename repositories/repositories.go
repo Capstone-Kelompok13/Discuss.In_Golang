@@ -18,9 +18,9 @@ type IDatabase interface {
 	RemoveTopic(topicID int) error
 
 	SaveNewPost(post models.Post) error
-	GetAllPostByTopic(topidID int, page int) ([]models.Post, error)
+	GetAllPostByTopic(topidID int, page int, search string) ([]models.Post, error)
 	GetPostById(postID int) (models.Post, error)
-	GetRecentPost(page int) ([]models.Post, error)
+	GetRecentPost(page int, search string) ([]models.Post, error)
 	SavePost(post models.Post) error
 	DeletePost(postID int) error
 	GetPostByIdWithAll(postID int) (models.Post, error)
@@ -41,12 +41,11 @@ type IDatabase interface {
 	SaveNewLike(like models.Like) error
 	SaveLike(like models.Like) error
 
-
-  SaveFollowedPost(followedPost models.FollowedPost) error
+	SaveFollowedPost(followedPost models.FollowedPost) error
 	GetFollowedPost(userId int, postId int) (models.FollowedPost, error)
 	DeleteFollowedPost(followedPostId int) error
 	GetAllFollowedPost(userId int) ([]models.FollowedPost, error)
-  
+
 	SaveBookmark(bookmark models.Bookmark) error
 	GetBookmark(userId int, postId int) (models.Bookmark, error)
 	DeleteBookmark(bookmarkId int) error

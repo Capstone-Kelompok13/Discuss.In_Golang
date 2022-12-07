@@ -16,11 +16,11 @@ func NewPostServices(db repositories.IDatabase) IPostServices {
 
 type IPostServices interface {
 	CreatePost(post models.Post, name string, token dto.Token) error
-	GetPosts(name string, page int) ([]dto.PublicPost, int, error)
+	GetPosts(name string, page int, search string) ([]dto.PublicPost, int, error)
 	GetPost(id int) (dto.PublicPost, error)
 	UpdatePost(newPost models.Post, id int, token dto.Token) error
 	DeletePost(id int, token dto.Token) error
-	GetRecentPost(page int) ([]dto.PublicPost, int, error)
+	GetRecentPost(page int, search string) ([]dto.PublicPost, int, error)
 }
 
 type postServices struct {
@@ -56,7 +56,7 @@ func (p *postServices) CreatePost(post models.Post, name string, token dto.Token
 	return nil
 }
 
-func (p *postServices) GetPosts(name string, page int) ([]dto.PublicPost, int, error) {
+func (p *postServices) GetPosts(name string, page int, search string) ([]dto.PublicPost, int, error) {
 	//find topic
 	topic, err := p.IDatabase.GetTopicByName(name)
 	if err != nil {
@@ -71,7 +71,7 @@ func (p *postServices) GetPosts(name string, page int) ([]dto.PublicPost, int, e
 		page = 1
 	}
 
-	posts, err := p.IDatabase.GetAllPostByTopic(int(topic.ID), page)
+	posts, err := p.IDatabase.GetAllPostByTopic(int(topic.ID), page, search)
 	if err != nil {
 		return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -219,13 +219,13 @@ func (p *postServices) DeletePost(id int, token dto.Token) error {
 	return nil
 }
 
-func (p *postServices) GetRecentPost(page int) ([]dto.PublicPost, int, error) {
+func (p *postServices) GetRecentPost(page int, search string) ([]dto.PublicPost, int, error) {
 	//cek jika page kosong
 	if page < 1 {
 		page = 1
 	}
 
-	posts, err := p.IDatabase.GetRecentPost(page)
+	posts, err := p.IDatabase.GetRecentPost(page, search)
 	if err != nil {
 		if err.Error() == "record not found" {
 			return nil, 0, echo.NewHTTPError(http.StatusNotFound, "Post not found")

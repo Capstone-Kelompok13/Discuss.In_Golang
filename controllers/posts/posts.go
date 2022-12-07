@@ -58,6 +58,10 @@ func (h *PostHandler) GetAllPost(c echo.Context) error {
 	if topicName == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "topic name should not be empty")
 	}
+
+	//insert search query param
+	search := (c.QueryParam("search"))
+
 	//check if page exist
 	var page int
 	if c.QueryParam("page") == "" {
@@ -70,7 +74,7 @@ func (h *PostHandler) GetAllPost(c echo.Context) error {
 		}
 	}
 
-	posts, numberOfPage, err := h.IPostServices.GetPosts(topicName, page)
+	posts, numberOfPage, err := h.IPostServices.GetPosts(topicName, page, search)
 	if err != nil {
 		return err
 	}
@@ -176,7 +180,9 @@ func (h *PostHandler) GetRecentPost(c echo.Context) error {
 		}
 	}
 
-	posts, numberOfPage, err := h.IPostServices.GetRecentPost(page)
+	search := c.QueryParam("search")
+
+	posts, numberOfPage, err := h.IPostServices.GetRecentPost(page, search)
 	if err != nil {
 		return err
 	}
