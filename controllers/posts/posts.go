@@ -193,3 +193,31 @@ func (h *PostHandler) GetRecentPost(c echo.Context) error {
 		"page":           page,
 	})
 }
+
+func (h *PostHandler) GetAllPostByLike(c echo.Context) error {
+	//check if page exist
+	pageStr := c.QueryParam("page")
+	var page int
+	if pageStr == "" {
+		page = 1
+	} else {
+		var err error
+		page, err = strconv.Atoi(pageStr)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+	}
+
+	search := c.QueryParam("search")
+
+	posts, numberOfPage, err := h.IPostServices.GetAllPostByLike(page, search)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"message":        "Success",
+		"data":           posts,
+		"number_of_page": numberOfPage,
+		"page":           page,
+	})
+}

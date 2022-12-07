@@ -90,6 +90,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	posts.POST("/create/:topic_name", pHandler.CreateNewPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	posts.GET("/all/:topic_name", pHandler.GetAllPost)
 	posts.GET("/recents", pHandler.GetRecentPost)
+	posts.GET("/recents/top", pHandler.GetAllPostByLike)
 	posts.GET("/:post_id", pHandler.GetPost)
 	posts.PUT("/edit/:post_id", pHandler.EditPost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))
 	posts.DELETE("/delete/:post_id", pHandler.DeletePost, middleware.JWT([]byte(configs.Cfg.TokenSecret)))

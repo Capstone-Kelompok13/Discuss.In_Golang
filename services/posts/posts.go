@@ -5,6 +5,7 @@ import (
 	"discusiin/models"
 	"discusiin/repositories"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -21,6 +22,7 @@ type IPostServices interface {
 	UpdatePost(newPost models.Post, id int, token dto.Token) error
 	DeletePost(id int, token dto.Token) error
 	GetRecentPost(page int, search string) ([]dto.PublicPost, int, error)
+	GetAllPostByLike(page int, search string) ([]dto.PublicPost, int, error)
 }
 
 type postServices struct {
@@ -262,6 +264,71 @@ func (p *postServices) GetRecentPost(page int, search string) ([]dto.PublicPost,
 			},
 		})
 	}
+
+	//count page number
+	numberOfPost, errPage := p.IDatabase.CountAllPost()
+	if errPage != nil {
+		return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	var numberOfPage int
+	if numberOfPost%20 == 0 {
+		numberOfPage = (numberOfPost / 20)
+	} else {
+		numberOfPage = (numberOfPost / 20) + 1
+	}
+
+	return result, numberOfPage, nil
+}
+
+func (p *postServices) GetAllPostByLike(page int, search string) ([]dto.PublicPost, int, error) {
+	//cek jika page kosong
+	if page < 1 {
+		page = 1
+	}
+
+	posts, err := p.IDatabase.GetRecentPost(page, search)
+	if err != nil {
+		if err.Error() == "record not found" {
+			return nil, 0, echo.NewHTTPError(http.StatusNotFound, "Post not found")
+		} else {
+			return nil, 0, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	}
+
+	var result []dto.PublicPost
+	for _, post := range posts {
+		likeCount, _ := p.IDatabase.CountPostLike(int(post.ID))
+		commentCount, _ := p.IDatabase.CountPostComment(int(post.ID))
+		dislikeCount, _ := p.IDatabase.CountPostDislike(int(post.ID))
+		result = append(result, dto.PublicPost{
+			Model:     post.Model,
+			Title:     post.Title,
+			Photo:     post.Photo,
+			Body:      post.Body,
+			CreatedAt: post.CreatedAt,
+			IsActive:  post.IsActive,
+			User: dto.PostUser{
+				UserID:   post.UserID,
+				Username: post.User.Username,
+				Photo:    post.User.Photo,
+			},
+			Topic: dto.PostTopic{
+				TopicID:   post.TopicID,
+				TopicName: post.Topic.Name,
+			},
+			Count: dto.PostCount{
+				LikeCount:    likeCount,
+				CommentCount: commentCount,
+				DislikeCount: dislikeCount,
+			},
+		})
+	}
+
+	//sort recent post slice
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Count.LikeCount-result[i].Count.DislikeCount > result[j].Count.LikeCount-result[j].Count.DislikeCount
+	})
 
 	//count page number
 	numberOfPost, errPage := p.IDatabase.CountAllPost()

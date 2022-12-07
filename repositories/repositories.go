@@ -21,6 +21,7 @@ type IDatabase interface {
 	GetAllPostByTopic(topidID int, page int, search string) ([]models.Post, error)
 	GetPostById(postID int) (models.Post, error)
 	GetRecentPost(page int, search string) ([]models.Post, error)
+	// GetAllPostByLike(page int, search string) ([]models.Post, error)
 	SavePost(post models.Post) error
 	DeletePost(postID int) error
 	GetPostByIdWithAll(postID int) (models.Post, error)
