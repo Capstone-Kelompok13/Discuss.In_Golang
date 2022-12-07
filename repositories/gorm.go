@@ -60,6 +60,13 @@ func (db GormSql) GetProfile(id int) (models.User, error) {
 	}
 	return user, nil
 }
+func (db GormSql) UpdateProfile(user models.User) error {
+	err := db.DB.Save(&user).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 // Topic -------------------------------------------------------------------------------------------------------------------------------------------------
 func (db GormSql) GetAllTopics() ([]models.Topic, error) {

@@ -124,3 +124,32 @@ func (h *UserHandler) GetProfile(c echo.Context) error {
 		"data":    result,
 	})
 }
+
+func (h *UserHandler) UpdateProfile(c echo.Context) error {
+	// validation
+	var u models.User
+
+	errBind := c.Bind(&u)
+	if errBind != nil {
+		return errBind
+	}
+
+	// isUsernameKosong?
+	if u.Username == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "username should not be empty")
+	}
+
+	token, errDecodeJWT := helper.DecodeJWT(c)
+	if errDecodeJWT != nil {
+		return errDecodeJWT
+	}
+
+	err := h.IUserServices.UpdateProfile(token, u)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message": "Profile Updated",
+	})
+}

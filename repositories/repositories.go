@@ -10,6 +10,7 @@ type IDatabase interface {
 	GetUserByEmail(email string) (models.User, error)
 	GetUsers(page int) ([]models.User, error)
 	GetProfile(id int) (models.User, error)
+	UpdateProfile(user models.User) error
 
 	GetAllTopics() ([]models.Topic, error)
 	GetTopicByName(topicName string) (models.Topic, error)

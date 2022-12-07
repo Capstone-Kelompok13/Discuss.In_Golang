@@ -21,6 +21,7 @@ type IUserServices interface {
 	Login(user models.User) (dto.Login, error)
 	GetUsers(token dto.Token, page int) ([]dto.PublicUser, error)
 	GetProfile(token dto.Token) (models.User, error)
+	UpdateProfile(token dto.Token, user models.User) error
 }
 
 type userServices struct {
@@ -147,4 +148,27 @@ func (s *userServices) GetProfile(token dto.Token) (models.User, error) {
 	}
 
 	return user, nil
+}
+
+func (s *userServices) UpdateProfile(token dto.Token, user models.User) error {
+	//get old profile
+	oldProfile, errGetProfile := s.IDatabase.GetProfile(int(token.ID))
+	if errGetProfile != nil {
+		if errGetProfile.Error() == "record not found" {
+			return echo.NewHTTPError(http.StatusNotFound, "Invalid JWT Data")
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, errGetProfile.Error())
+		}
+	}
+
+	oldProfile.Username = user.Username
+	oldProfile.Photo = user.Photo
+
+	//update profile
+	errUpdateProfile := s.IDatabase.UpdateProfile(oldProfile)
+	if errUpdateProfile != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errUpdateProfile.Error())
+	}
+
+	return nil
 }
