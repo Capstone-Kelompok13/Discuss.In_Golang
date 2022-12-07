@@ -75,7 +75,7 @@ func (h *BookmarkHandler) GetAllBookmark(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{
-		"message":       "Success",
-		"data_bookmark": bookmarks,
+		"message": "Success",
+		"data":    bookmarks,
 	})
 }

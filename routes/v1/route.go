@@ -28,11 +28,26 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	e.Pre(middleware.RemoveTrailingSlash())
 	mid.LogMiddleware(e)
 	e.Use(middleware.Recover())
-	cors := middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{http.MethodGet, http.MethodHead, http.MethodPut, http.MethodPatch, http.MethodPost, http.MethodDelete},
-		AllowHeaders: []string{"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization"},
-	})
+	cors := middleware.CORSWithConfig(
+		middleware.CORSConfig{
+			AllowOrigins: []string{"*"},
+			AllowMethods: []string{
+				http.MethodGet,
+				http.MethodHead,
+				http.MethodPut,
+				http.MethodPatch,
+				http.MethodPost,
+				http.MethodDelete},
+			AllowHeaders: []string{
+				"Accept",
+				"Content-Type",
+				"Content-Length",
+				"Accept-Encoding",
+				"X-CSRF-Token",
+				"Authorization",
+				"Origin",
+			},
+		})
 	e.Use(cors)
 
 	trace := jaegertracing.New(e, nil)
