@@ -15,7 +15,7 @@ func NewTopicServices(db repositories.IDatabase) ITopicServices {
 
 type ITopicServices interface {
 	GetTopics() ([]models.Topic, error)
-	CreateTopic(topic models.Topic, token dto.Token) error
+	CreateTopic(topic models.Topic, token dto.Token) (models.Topic, error)
 	GetTopic(id int) (models.Topic, error)
 	UpdateTopicDescription(topic models.Topic, token dto.Token) error
 	SaveTopic(topic models.Topic, token dto.Token) error
@@ -40,36 +40,41 @@ func (t *topicServices) GetTopics() ([]models.Topic, error) {
 	return topics, nil
 }
 
-func (t *topicServices) CreateTopic(topic models.Topic, token dto.Token) error {
+func (t *topicServices) CreateTopic(topic models.Topic, token dto.Token) (models.Topic, error) {
 	// isAdmin?
 	user, errGetUser := t.IDatabase.GetUserByUsername(token.Username)
 	if errGetUser != nil {
 		if errGetUser.Error() == "record not found" {
-			return echo.NewHTTPError(http.StatusNotFound, "User not found")
+			return models.Topic{}, echo.NewHTTPError(http.StatusNotFound, "User not found")
 		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, errGetUser.Error())
+			return models.Topic{}, echo.NewHTTPError(http.StatusInternalServerError, errGetUser.Error())
 		}
 	}
 	if !user.IsAdmin {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Admin access only")
+		return models.Topic{}, echo.NewHTTPError(http.StatusUnauthorized, "Admin access only")
 	}
 
+	var result models.Topic
 	// isExist?
 	_, errGetTopicByName := t.IDatabase.GetTopicByName(topic.Name)
 	if errGetTopicByName != nil {
 		if errGetTopicByName.Error() == "record not found" {
 			errSaveNewTopic := t.IDatabase.SaveNewTopic(topic)
 			if errSaveNewTopic != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, errSaveNewTopic.Error())
+				return models.Topic{}, echo.NewHTTPError(http.StatusInternalServerError, errSaveNewTopic.Error())
 			}
+			Topic, err := t.IDatabase.GetTopicByName(topic.Name)
+			if err != nil {
+				return models.Topic{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+			result = Topic
 		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, errGetTopicByName.Error())
+			return models.Topic{}, echo.NewHTTPError(http.StatusInternalServerError, errGetTopicByName.Error())
 		}
 	} else {
-		return echo.NewHTTPError(http.StatusConflict, "Topic already exist")
+		return models.Topic{}, echo.NewHTTPError(http.StatusConflict, "Topic already exist")
 	}
-
-	return nil
+	return result, nil
 }
 
 func (t *topicServices) GetTopic(id int) (models.Topic, error) {

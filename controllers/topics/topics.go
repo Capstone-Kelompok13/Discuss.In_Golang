@@ -38,13 +38,14 @@ func (h *TopicHandler) CreateNewTopic(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "description name should not be empty")
 	}
 
-	err := h.ITopicServices.CreateTopic(topic, token)
+	result, err := h.ITopicServices.CreateTopic(topic, token)
 	if err != nil {
 		return err
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
 		"message": "Topic created",
+		"data":    result,
 	})
 }
 
