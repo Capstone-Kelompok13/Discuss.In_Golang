@@ -16,5 +16,6 @@ type BookmarkPost struct {
 }
 type BookmarkUser struct {
 	UserID   int    `json:"userId" form:"userId"`
+	Photo    string `json:"photo" form:"photo"`
 	Username string `json:"username" form:"username"`
 }
