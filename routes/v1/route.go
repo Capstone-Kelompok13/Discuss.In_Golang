@@ -31,7 +31,7 @@ func InitRoute(payload *routes.Payload) (*echo.Echo, io.Closer) {
 	cors := middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodHead, http.MethodPut, http.MethodPatch, http.MethodPost, http.MethodDelete},
-		AllowHeaders: []string{"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization"},
+		AllowHeaders: []string{"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization", "Origin"},
 	})
 	e.Use(cors)
 
